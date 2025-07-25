@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { 
   Menu, 
@@ -26,15 +26,27 @@ const sidebarItems = [
 function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [emailUser, setEmailUser] = useState<string>("");
   const pathname = usePathname();
 
+  useEffect(() => {
+    const checkUser = async () => {
+      const supabase = createClient();
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error || !user) {
+        window.location.href = '/';
+      } else {
+        setEmailUser(user.email ? user.email : '');
+      }
+    };
+    checkUser();
+  }, []);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     const supabase = createClient();
-    supabase.auth.signOut();
-    window.location.href = "/"; 
+    await supabase.auth.signOut();
+    window.location.href = "/";
   };
-
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
@@ -74,7 +86,7 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
               </div>
               <div className="hidden sm:block text-left">
                 <p className="text-sm font-semibold text-gray-800">Administrador</p>
-                <p className="text-xs text-gray-500">admin@hostal.com</p>
+                <p className="text-xs text-gray-500">{emailUser}</p>
               </div>
               <ChevronDown size={16} className={`text-gray-400 transition-transform duration-200 ${userMenuOpen ? 'rotate-180' : ''}`} />
             </button>
@@ -170,7 +182,7 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
 
         {/* Main Content */}
         <main className="flex-1 min-h-[calc(100vh-80px)]">
-          <div className="h-full p-4 sm:p-6 lg:p-8">
+          <div className="h-full p-2 sm:p-4 lg:p-6">
             <div className="h-full bg-white/60 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6 sm:p-8 lg:p-10">
               {children}
             </div>
