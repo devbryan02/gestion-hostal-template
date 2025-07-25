@@ -51,7 +51,7 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200/50 shadow-sm">
+      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200/50">
         <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4">
           {/* Logo y Menu Mobile */}
           <div className="flex items-center gap-4">
@@ -182,8 +182,8 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
 
         {/* Main Content */}
         <main className="flex-1 min-h-[calc(100vh-80px)]">
-          <div className="h-full p-2 sm:p-4 lg:p-6">
-            <div className="h-full bg-white/60 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6 sm:p-8 lg:p-10">
+          <div className="h-full ">
+            <div className="h-full bg-white/60 p-6 sm:p-8 lg:p-10">
               {children}
             </div>
           </div>

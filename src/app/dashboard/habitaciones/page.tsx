@@ -1,9 +1,6 @@
-function HabitacionesPage() {
-    return (
-        <div>
-            <h1>Habitaciones</h1>
-        </div>
-    );
+import RoomsClient from "@/features/habitaciones/components/RoomsClient";
+
+export default function HabitacionesPage() {
+    return <RoomsClient />;
 }
 
-export default HabitacionesPage;
