@@ -1,9 +1,7 @@
-function InquilinosPage() {
-    return (
-        <div>
-            <h1>Inquilinos</h1>
-        </div>
-    );
+import TenantsClient from "@/features/inquilinos/components/TenantsClient";
+
+export default function InquilinosPage() {
+    return <TenantsClient />; 
 }
 
-export default InquilinosPage;
+
