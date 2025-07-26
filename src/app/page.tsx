@@ -6,6 +6,7 @@ import LoginForm from "@/features/auth/components/LoginForm";
 import { Building, Users, Shield, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { APP_NAME } from "@/constants/constants";
 
 export default function Home() {
   const [showRegister, setShowRegister] = useState(false);
@@ -30,37 +31,37 @@ export default function Home() {
               </div>
               <div>
                 <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  Hostal Gestión
+                  {APP_NAME}
                 </h1>
                 <p className="text-sm text-gray-600 font-medium">Sistema de Administración Hotelera</p>
               </div>
             </div>
             
-            <p className="text-lg text-gray-700 max-w-md mx-auto lg:mx-0">
+            <p className="text-md text-gray-700 max-w-md mx-auto lg:mx-0">
               Administra ocupaciones, inquilinos, habitaciones y operaciones de tu hostal de forma segura, eficiente y moderna.
             </p>
           </div>
 
           {/* Features */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-md mx-auto lg:max-w-none">
-            <Card className="bg-white/60 backdrop-blur-sm border-0 shadow-lg">
+            <Card className="bg-white/60 backdrop-blur-sm border-0">
               <CardContent className="p-4 text-center">
                 <Users className="w-8 h-8 text-blue-500 mx-auto mb-2" />
                 <h3 className="font-semibold text-sm text-gray-800">Gestión de Inquilinos</h3>
               </CardContent>
             </Card>
             
-            <Card className="bg-white/60 backdrop-blur-sm border-0 shadow-lg">
+            <Card className="bg-white/60 backdrop-blur-sm border-0">
               <CardContent className="p-4 text-center">
                 <Shield className="w-8 h-8 text-indigo-500 mx-auto mb-2" />
                 <h3 className="font-semibold text-sm text-gray-800">Seguridad Avanzada</h3>
               </CardContent>
             </Card>
             
-            <Card className="bg-white/60 backdrop-blur-sm border-0 shadow-lg">
+            <Card className="bg-white/60 backdrop-blur-sm border-0 ">
               <CardContent className="p-4 text-center">
                 <BarChart3 className="w-8 h-8 text-purple-500 mx-auto mb-2" />
-                <h3 className="font-semibold text-sm text-gray-800">Reportes en Tiempo Real</h3>
+                <h3 className="font-semibold text-sm text-gray-800">Estadísticas en Tiempo Real</h3>
               </CardContent>
             </Card>
           </div>

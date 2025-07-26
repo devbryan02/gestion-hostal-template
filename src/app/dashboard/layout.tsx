@@ -15,6 +15,7 @@ import {
   ChevronDown
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { APP_NAME } from "@/constants/constants";
 
 const sidebarItems = [
   { href: "/dashboard", icon: <Home size={18} />, label: "Panel" },
@@ -68,7 +69,7 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
               </div>
               <div className="hidden sm:block">
                 <h1 className="font-bold text-lg bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  Hostal Gestión
+                  {APP_NAME}
                 </h1>
                 <p className="text-xs text-gray-500">Sistema de Administración</p>
               </div>

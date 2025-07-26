@@ -3,11 +3,12 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import { Mail, Lock, Eye, EyeOff, AlertCircle } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { APP_NAME } from "@/constants/constants";
+import Swal from "sweetalert2";
 
 function LoginForm() {
   const supabase = createClient();
@@ -41,6 +42,21 @@ function LoginForm() {
       handleLogin();
     }
   };
+
+  useEffect(() => {
+    if (errorMsg) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error de Inicio de Sesión',
+        text: errorMsg,
+        toast: true,
+        position: 'bottom-right',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+      });
+    }
+  }, [errorMsg]);
 
   return (
     <div className="space-y-5">
@@ -106,18 +122,6 @@ function LoginForm() {
         </div>
       </div>
       
-      {/* Error Message */}
-      {errorMsg && (
-        <Alert className="border-0 bg-red-50/80 text-red-700">
-          <div className="flex items-center gap-2">
-            <AlertCircle size={18} className="text-red-500" />
-            <AlertDescription className="font-medium">
-              {errorMsg}
-            </AlertDescription>
-          </div>
-        </Alert>
-      )}
-
       {/* Submit Button */}
       <Button
         onClick={handleLogin}
