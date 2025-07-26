@@ -37,7 +37,7 @@ export default function Home() {
             </div>
             
             <p className="text-lg text-gray-700 max-w-md mx-auto lg:mx-0">
-              Administra reservas, huéspedes y operaciones de tu hostal de forma segura, eficiente y moderna.
+              Administra ocupaciones, inquilinos, habitaciones y operaciones de tu hostal de forma segura, eficiente y moderna.
             </p>
           </div>
 
@@ -46,7 +46,7 @@ export default function Home() {
             <Card className="bg-white/60 backdrop-blur-sm border-0 shadow-lg">
               <CardContent className="p-4 text-center">
                 <Users className="w-8 h-8 text-blue-500 mx-auto mb-2" />
-                <h3 className="font-semibold text-sm text-gray-800">Gestión de Huéspedes</h3>
+                <h3 className="font-semibold text-sm text-gray-800">Gestión de Inquilinos</h3>
               </CardContent>
             </Card>
             
@@ -83,7 +83,7 @@ export default function Home() {
               </div>
 
               {/* Form Component */}
-              {showRegister ? <RegisterForm /> : <LoginForm />}
+              {showRegister ? null : <LoginForm />}
 
               {/* Toggle Form */}
               <div className="mt-6 text-center">
