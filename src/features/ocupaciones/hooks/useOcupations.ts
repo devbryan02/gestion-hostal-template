@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { OcupationService, CreateOccupationRequest, UpdateOccupationRequest } from "./OcupationService";
+import { OcupationService, CreateOccupationRequest, UpdateOccupationRequest } from "../service/OcupationService";
 import { Occupation, OccupationStatus } from "@/types";
 import Swal from "sweetalert2";
 

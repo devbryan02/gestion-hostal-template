@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogC
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { UpdateOccupationRequest } from "../OcupationService";
+import { UpdateOccupationRequest } from "../service/OcupationService";
 import { Occupation, OccupationStatus } from "@/types";
 
 interface EditOcupationModalProps {

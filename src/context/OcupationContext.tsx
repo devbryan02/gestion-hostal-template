@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react';
-import { useOcupations } from '@/features/ocupaciones/useOcupations';
+import { useOcupations } from '@/features/ocupaciones/hooks/useOcupations';
 
 const OcupationContext = createContext<ReturnType<typeof useOcupations> | undefined>(undefined);
 
