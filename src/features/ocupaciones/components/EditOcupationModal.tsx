@@ -17,6 +17,7 @@ import { UpdateOccupationRequest } from "../service/OcupationService";
 import { Occupation, OccupationStatus } from "@/types";
 import { RoomSelect } from "./RoomSelect";
 import { TenantSelect } from "./TenantSelect";
+import { differenceInCalendarDays, parseISO } from "date-fns";
 
 interface EditOcupationModalProps {
   isOpen: boolean;
@@ -132,15 +133,29 @@ export function EditOcupationModal({ isOpen, onClose, occupation, rooms, tenants
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!occupation) return;
-    try {
-      await updateOccupation(formData);
-      onClose();
-    } catch (error) {
-      console.error("Error al editar ocupación:", error);
-    }
-  };
+  e.preventDefault();
+  if (!occupation) return;
+  try {
+    // Calcular noches y total_amount
+    const nights =
+      formData.check_in_date && formData.planned_check_out
+        ? differenceInCalendarDays(
+            parseISO(formData.planned_check_out),
+            parseISO(formData.check_in_date)
+          )
+        : 0;
+
+    const total_amount = formData.price_per_night * (nights > 0 ? nights : 1);
+
+    await updateOccupation({
+      ...formData,
+      total_amount, 
+    });
+    onClose();
+  } catch (error) {
+    console.error("Error al editar ocupación:", error);
+  }
+};
 
   if (!isOpen || !occupation) return null;
 

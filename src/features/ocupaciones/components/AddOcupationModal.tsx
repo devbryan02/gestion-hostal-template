@@ -16,6 +16,8 @@ import { CalendarIcon } from "lucide-react";
 import { CreateOccupationRequest } from "../service/OcupationService";
 import { RoomSelect } from "./RoomSelect";
 import { TenantSelect } from "./TenantSelect";
+import { differenceInCalendarDays, parseISO } from "date-fns";
+import Swal from "sweetalert2";
 
 interface AddOcupationModalProps {
   isOpen: boolean;
@@ -88,11 +90,40 @@ export function AddOcupationModal({ isOpen, onClose, rooms, tenants }: AddOcupat
       planned_check_out: date ? format(date, "yyyy-MM-dd") : "",
     }));
   };
+ 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await createOccupation(formData);
+
+      if (!formData.check_in_date || !formData.planned_check_out) {
+      Swal.fire({
+        toast: true,
+        icon: "error",
+        title: "Debes seleccionar la fecha de ingreso y la fecha de salida planificada.",
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+      });
+      return;
+    }
+      const nights =
+        formData.check_in_date && formData.planned_check_out
+          ? differenceInCalendarDays(
+            parseISO(formData.planned_check_out),
+            parseISO(formData.check_in_date)
+          )
+          : 0;
+
+      // Calcular total_amount
+      const total_amount = formData.price_per_night * (nights > 0 ? nights : 1);
+
+      await createOccupation({
+        ...formData,
+        total_amount,
+      });
+
       setFormData({
         room_id: "",
         tenant_id: "",
@@ -101,6 +132,7 @@ export function AddOcupationModal({ isOpen, onClose, rooms, tenants }: AddOcupat
         price_per_night: 0,
         status: "active",
         notes: "",
+        total_amount: 0,
       });
       setCheckInDate(undefined);
       setPlannedCheckOutDate(undefined);
@@ -129,7 +161,7 @@ export function AddOcupationModal({ isOpen, onClose, rooms, tenants }: AddOcupat
                 placeholder="Buscar habitación..."
               />
             </div>
-            
+
             <div>
               <Label>Inquilino *</Label>
               <TenantSelect
@@ -139,7 +171,7 @@ export function AddOcupationModal({ isOpen, onClose, rooms, tenants }: AddOcupat
                 placeholder="Buscar inquilino..."
               />
             </div>
-            
+
             <div>
               <Label>Fecha de ingreso *</Label>
               <Popover>
@@ -167,7 +199,7 @@ export function AddOcupationModal({ isOpen, onClose, rooms, tenants }: AddOcupat
                 </PopoverContent>
               </Popover>
             </div>
-            
+
             <div>
               <Label>Fecha de salida planificada *</Label>
               <Popover>
@@ -195,7 +227,7 @@ export function AddOcupationModal({ isOpen, onClose, rooms, tenants }: AddOcupat
                 </PopoverContent>
               </Popover>
             </div>
-            
+
             <div>
               <Label htmlFor="price_per_night">Precio por noche *</Label>
               <Input
@@ -209,7 +241,7 @@ export function AddOcupationModal({ isOpen, onClose, rooms, tenants }: AddOcupat
                 className="bg-gray-50 border-gray-200 text-gray-900 rounded-lg"
               />
             </div>
-            
+
             <div>
               <Label htmlFor="status">Estado</Label>
               <Select value={formData.status} onValueChange={handleStatusSelect}>
@@ -223,7 +255,7 @@ export function AddOcupationModal({ isOpen, onClose, rooms, tenants }: AddOcupat
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div className="md:col-span-2">
               <Label htmlFor="notes">Notas</Label>
               <textarea

@@ -10,6 +10,7 @@ export interface CreateOccupationRequest {
     check_in_date: string;
     planned_check_out: string;
     price_per_night: number;
+    total_amount?: number; 
     status?: OccupationStatus;
     notes?: string;
 }
@@ -20,7 +21,8 @@ export interface UpdateOccupationRequest {
     tenant_id?: string;
     check_in_date?: string;
     planned_check_out?: string;
-    price_per_night?: number;
+    price_per_night: number;
+    total_amount?: number;
     status?: OccupationStatus;
     notes?: string;
     check_out_date?: string;

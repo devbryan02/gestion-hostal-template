@@ -1,8 +1,7 @@
+import DashboardClient from "@/features/panel/components/DashboardClient";
+
+
 export default function DashboardPage() {
-    return (
-        <div>
-            <h1>Dashboard</h1>
-        </div>
-    );
+    return <DashboardClient />;
 }
 
