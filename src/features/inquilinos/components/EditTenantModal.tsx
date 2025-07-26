@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useTenantContext } from "@/context/TenantContext";
-import { X, Pencil } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { Tenant, DocumentType } from "@/types";
 import { UpdateTenantRequest } from "../service/TenantService";
 import {

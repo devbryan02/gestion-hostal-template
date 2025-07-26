@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import LoginForm from "@/features/auth/components/LoginForm";
-import RegisterForm from "@/features/auth/components/RegisterForm";
+//import RegisterForm from "@/features/auth/components/RegisterForm";
 import { Building, Users, Shield, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";

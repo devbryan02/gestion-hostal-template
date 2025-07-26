@@ -33,7 +33,7 @@ function RegisterForm() {
   };
 
   const isError = mensaje.startsWith('error:');
-  const isSuccess = mensaje.startsWith('success:');
+  //const isSuccess = mensaje.startsWith('success:');
   const cleanMessage = mensaje.replace(/^(error:|success:)/, '');
 
   return (

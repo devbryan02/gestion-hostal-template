@@ -1,7 +1,7 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRoomContext } from "@/context/RoomContext";
-import { X, Pencil } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { Room, RoomStatus } from "@/types";
 import { UpdateRoomRequest } from "../service/RoomService";
 import {
@@ -43,27 +43,34 @@ export function EditRoomModal({ isOpen, onClose, room }: EditRoomModalProps) {
 		description: "",
 	});
 
-	// Tipos de habitaciones comunes en hoteles medianos y pequeños
-	const roomTypes = [
-		{ value: "individual", label: "Individual" },
-		{ value: "matrimonial", label: "Matrimonial" },
-		{ value: "doble", label: "Doble" },
-		{ value: "triple", label: "Triple" },
-		{ value: "cuadruple", label: "Cuádruple" },
-		{ value: "suite", label: "Suite" },
-		{ value: "familiar", label: "Familiar" },
-		{ value: "ejecutiva", label: "Ejecutiva" },
-	];
+	// Memoiza roomTypes para que su referencia no cambie en cada render
+	const roomTypes = useMemo(
+		() => [
+			{ value: "individual", label: "Individual" },
+			{ value: "matrimonial", label: "Matrimonial" },
+			{ value: "doble", label: "Doble" },
+			{ value: "triple", label: "Triple" },
+			{ value: "cuadruple", label: "Cuádruple" },
+			{ value: "suite", label: "Suite" },
+			{ value: "familiar", label: "Familiar" },
+			{ value: "ejecutiva", label: "Ejecutiva" },
+		],
+		[]
+	);
 
 	// Función para normalizar el tipo de habitación
-	const normalizeRoomType = (type: string) => {
-		const normalized = type.toLowerCase().trim();
-		const found = roomTypes.find(roomType =>
-			roomType.value === normalized ||
-			roomType.label.toLowerCase() === normalized
-		);
-		return found ? found.value : type;
-	};
+	const normalizeRoomType = useCallback(
+		(type: string) => {
+			const normalized = type.toLowerCase().trim();
+			const found = roomTypes.find(
+				roomType =>
+					roomType.value === normalized ||
+					roomType.label.toLowerCase() === normalized
+			);
+			return found ? found.value : type;
+		},
+		[roomTypes]
+	);
 
 	useEffect(() => {
 		if (room) {
@@ -76,7 +83,7 @@ export function EditRoomModal({ isOpen, onClose, room }: EditRoomModalProps) {
 				description: room.description ?? "",
 			});
 		}
-	}, [room]);
+	}, [room, normalizeRoomType]);
 
 	const handleChange = (
 		e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -160,7 +167,10 @@ export function EditRoomModal({ isOpen, onClose, room }: EditRoomModalProps) {
 							>
 								Tipo *
 							</Label>
-							<Select value={formData.type} onValueChange={(value) => handleSelectChange("type", value)}>
+							<Select
+								value={formData.type}
+								onValueChange={(value) => handleSelectChange("type", value)}
+							>
 								<SelectTrigger className="bg-gray-50 border-gray-200 text-gray-900 rounded-lg">
 									<SelectValue placeholder="Selecciona un tipo" />
 								</SelectTrigger>

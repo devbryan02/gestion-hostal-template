@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRoomContext } from "@/context/RoomContext";
-import { Plus, X, BedDouble } from "lucide-react";
+import { Plus, BedDouble } from "lucide-react";
 import {
   Dialog,
   DialogContent,

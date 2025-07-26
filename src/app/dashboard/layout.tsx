@@ -142,7 +142,7 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
               <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
                 Navegación
               </h3>
-              {sidebarItems.map((item, index) => {
+              {sidebarItems.map((item) => {
                 const isActive = pathname === item.href;
                 return (
                   <Link

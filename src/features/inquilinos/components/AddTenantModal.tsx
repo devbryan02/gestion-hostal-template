@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useTenantContext } from "@/context/TenantContext";
-import { Plus, X, User2 } from "lucide-react";
+import { Plus, User2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
