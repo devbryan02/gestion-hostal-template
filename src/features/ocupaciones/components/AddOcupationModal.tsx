@@ -6,12 +6,21 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogC
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
+import { CalendarIcon } from "lucide-react";
 import { CreateOccupationRequest } from "../service/OcupationService";
+import { RoomSelect } from "./RoomSelect";
+import { TenantSelect } from "./TenantSelect";
 
 interface AddOcupationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  rooms: { id: string; number: string }[];
+  rooms: { id: string; number: string; price_per_night: number }[];
   tenants: { id: string; name: string }[];
 }
 
@@ -28,13 +37,55 @@ export function AddOcupationModal({ isOpen, onClose, rooms, tenants }: AddOcupat
     notes: "",
   });
 
+  const [checkInDate, setCheckInDate] = useState<Date>();
+  const [plannedCheckOutDate, setPlannedCheckOutDate] = useState<Date>();
+
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: name === "price_per_night" ? parseFloat(value) : value,
+    }));
+  };
+
+  const handleRoomSelect = (value: string) => {
+    const selectedRoom = rooms.find(room => room.id === value);
+    setFormData(prev => ({
+      ...prev,
+      room_id: value,
+      price_per_night: selectedRoom?.price_per_night || 0,
+    }));
+  };
+
+  const handleTenantSelect = (value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      tenant_id: value,
+    }));
+  };
+
+  const handleStatusSelect = (value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      status: value as CreateOccupationRequest["status"],
+    }));
+  };
+
+  const handleCheckInDateSelect = (date: Date | undefined) => {
+    setCheckInDate(date);
+    setFormData(prev => ({
+      ...prev,
+      check_in_date: date ? format(date, "yyyy-MM-dd") : "",
+    }));
+  };
+
+  const handlePlannedCheckOutDateSelect = (date: Date | undefined) => {
+    setPlannedCheckOutDate(date);
+    setFormData(prev => ({
+      ...prev,
+      planned_check_out: date ? format(date, "yyyy-MM-dd") : "",
     }));
   };
 
@@ -51,6 +102,8 @@ export function AddOcupationModal({ isOpen, onClose, rooms, tenants }: AddOcupat
         status: "active",
         notes: "",
       });
+      setCheckInDate(undefined);
+      setPlannedCheckOutDate(undefined);
       onClose();
     } catch (error) {
       console.error("Error al agregar ocupación:", error);
@@ -68,65 +121,81 @@ export function AddOcupationModal({ isOpen, onClose, rooms, tenants }: AddOcupat
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <Label htmlFor="room_id">Habitación *</Label>
-              <select
-                id="room_id"
-                name="room_id"
+              <Label>Habitación *</Label>
+              <RoomSelect
+                rooms={rooms}
                 value={formData.room_id}
-                onChange={handleChange}
-                required
-                className="bg-gray-50 border-gray-200 text-gray-900 rounded-lg px-3 py-2 w-full"
-              >
-                <option value="">Selecciona una habitación</option>
-                {rooms.map(room => (
-                  <option key={room.id} value={room.id}>
-                    {room.number}
-                  </option>
-                ))}
-              </select>
+                onValueChange={handleRoomSelect}
+                placeholder="Buscar habitación..."
+              />
             </div>
+            
             <div>
-              <Label htmlFor="tenant_id">Inquilino *</Label>
-              <select
-                id="tenant_id"
-                name="tenant_id"
+              <Label>Inquilino *</Label>
+              <TenantSelect
+                tenants={tenants}
                 value={formData.tenant_id}
-                onChange={handleChange}
-                required
-                className="bg-gray-50 border-gray-200 text-gray-900 rounded-lg px-3 py-2 w-full"
-              >
-                <option value="">Selecciona un inquilino</option>
-                {tenants.map(tenant => (
-                  <option key={tenant.id} value={tenant.id}>
-                    {tenant.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <Label htmlFor="check_in_date">Fecha de ingreso *</Label>
-              <Input
-                id="check_in_date"
-                name="check_in_date"
-                type="date"
-                value={formData.check_in_date}
-                onChange={handleChange}
-                required
-                className="bg-gray-50 border-gray-200 text-gray-900 rounded-lg"
+                onValueChange={handleTenantSelect}
+                placeholder="Buscar inquilino..."
               />
             </div>
+            
             <div>
-              <Label htmlFor="planned_check_out">Fecha de salida planificada *</Label>
-              <Input
-                id="planned_check_out"
-                name="planned_check_out"
-                type="date"
-                value={formData.planned_check_out}
-                onChange={handleChange}
-                required
-                className="bg-gray-50 border-gray-200 text-gray-900 rounded-lg"
-              />
+              <Label>Fecha de ingreso *</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal bg-gray-50 border-gray-200 text-gray-900 rounded-lg",
+                      !checkInDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {checkInDate ? format(checkInDate, "PPP", { locale: es }) : "Seleccionar fecha"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={checkInDate}
+                    onSelect={handleCheckInDateSelect}
+                    disabled={(date) => date < new Date("1900-01-01")}
+                    initialFocus
+                    locale={es}
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
+            
+            <div>
+              <Label>Fecha de salida planificada *</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal bg-gray-50 border-gray-200 text-gray-900 rounded-lg",
+                      !plannedCheckOutDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {plannedCheckOutDate ? format(plannedCheckOutDate, "PPP", { locale: es }) : "Seleccionar fecha"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={plannedCheckOutDate}
+                    onSelect={handlePlannedCheckOutDateSelect}
+                    disabled={(date) => checkInDate ? date < checkInDate : date < new Date("1900-01-01")}
+                    initialFocus
+                    locale={es}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            
             <div>
               <Label htmlFor="price_per_night">Precio por noche *</Label>
               <Input
@@ -140,20 +209,21 @@ export function AddOcupationModal({ isOpen, onClose, rooms, tenants }: AddOcupat
                 className="bg-gray-50 border-gray-200 text-gray-900 rounded-lg"
               />
             </div>
+            
             <div>
               <Label htmlFor="status">Estado</Label>
-              <select
-                id="status"
-                name="status"
-                value={formData.status}
-                onChange={handleChange}
-                className="bg-gray-50 border-gray-200 text-gray-900 rounded-lg px-3 py-2 w-full"
-              >
-                <option value="active">Activa</option>
-                <option value="completed">Completada</option>
-                <option value="canceled">Cancelada</option>
-              </select>
+              <Select value={formData.status} onValueChange={handleStatusSelect}>
+                <SelectTrigger className="bg-gray-50 border-gray-200 text-gray-900 rounded-lg">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Activa</SelectItem>
+                  <SelectItem value="completed">Completada</SelectItem>
+                  <SelectItem value="canceled">Cancelada</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
+            
             <div className="md:col-span-2">
               <Label htmlFor="notes">Notas</Label>
               <textarea
@@ -161,7 +231,7 @@ export function AddOcupationModal({ isOpen, onClose, rooms, tenants }: AddOcupat
                 name="notes"
                 value={formData.notes}
                 onChange={handleChange}
-                className="bg-gray-50 border-gray-200 text-gray-900 rounded-lg px-3 py-2 w-full"
+                className="bg-gray-50 border-gray-200 text-gray-900 rounded-lg px-3 py-2 w-full border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 rows={2}
                 placeholder="Notas adicionales (opcional)"
               />

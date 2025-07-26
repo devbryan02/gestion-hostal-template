@@ -15,17 +15,23 @@ const OcupationsContent = () => {
   const [isAddModalOpen, setAddModalOpen] = useState(false);
 
   // Estado para rooms y tenants
-  const [rooms, setRooms] = useState<{ id: string; number: string }[]>([]);
+  const [roomsAvailable, setRoomsAvailable] = useState<{ id: string; number: string; price_per_night: number }[]>([]);
   const [tenants, setTenants] = useState<{ id: string; name: string }[]>([]);
+
+  // Fetch rooms y tenants al montar el componente
+  const [rooms, setRooms] = useState<{ id: string; number: string; price_per_night: number }[]>([]);
+
 
   // Fetch rooms y tenants al montar el componente
   useEffect(() => {
     const fetchData = async () => {
       const roomService = new RoomService();
       const tenantService = new TenantService();
-      const fetchedRooms = await roomService.fetchByStatus("available");
+      const fetchedRoomsAvailable = await roomService.fetchByStatus("available");
+      const fetchedRooms = await roomService.fetchFirst10();
       const fetchedTenants = await tenantService.fetchFirst10();
-      setRooms(fetchedRooms.map(r => ({ id: r.id, number: r.number })));
+      setRoomsAvailable(fetchedRoomsAvailable.map(r => ({ id: r.id, number: r.number, price_per_night: r.price_per_night })));
+      setRooms(fetchedRooms.map(r => ({ id: r.id, number: r.number, price_per_night: r.price_per_night })));
       setTenants(fetchedTenants.map(t => ({ id: t.id, name: t.name })));
     };
     fetchData();
@@ -89,7 +95,10 @@ const OcupationsContent = () => {
                 {occupations?.length || 0} resultados
               </span>
             </div>
-            <OcupationsList />
+            <OcupationsList 
+              rooms={rooms}
+              tenants={tenants}
+            />
           </div>
         )}
       </div>
@@ -98,7 +107,7 @@ const OcupationsContent = () => {
       <AddOcupationModal
         isOpen={isAddModalOpen}
         onClose={closeAddModal}
-        rooms={rooms}
+        rooms={roomsAvailable}
         tenants={tenants}
       />
     </div>

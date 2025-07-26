@@ -82,16 +82,6 @@ export function AddTenantModal({ isOpen, onClose }: AddTenantModalProps) {
                 Completa los datos para registrar un nuevo inquilino
               </DialogDescription>
             </div>
-            <DialogClose asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="ml-auto text-gray-500 hover:bg-gray-100"
-                disabled={loading}
-              >
-                <X className="w-5 h-5" />
-              </Button>
-            </DialogClose>
           </div>
         </DialogHeader>
 

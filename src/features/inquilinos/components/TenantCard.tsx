@@ -28,39 +28,38 @@ export function TenantCard({ tenant }: TenantCardProps) {
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
-      <div className="p-6">
+    <div className="bg-white border border-gray-200 rounded-xl shadow hover:shadow-lg transition-shadow duration-300">
+      <div className="p-4">
 
         {/* Header */}
-        <div className="flex items-start justify-between mb-4">
+        <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
-            <div className="w-14 h-14 bg-indigo-600 rounded-xl flex items-center justify-center shadow-md">
-              <User2 className="w-7 h-7 text-white" />
+            <div className="w-11 h-11 bg-indigo-600 rounded-lg flex items-center justify-center shadow-md">
+              <User2 className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h2 className="font-bold text-xl text-gray-900">{tenant.name}</h2>
-              <span className="inline-block bg-gray-100 text-indigo-700 text-xs font-semibold px-2 py-1 rounded mt-1">
+              <h2 className="font-bold text-base text-gray-900">{tenant.name}</h2>
+              <span className="inline-block bg-gray-100 text-indigo-700 text-xs font-semibold px-2 py-0.5 rounded mt-0.5">
                 {tenant.document_type} - {tenant.document_number}
               </span>
             </div>
           </div>
-
           {/* Actions Menu */}
           <div className="relative">
             <button
-              className="p-2 rounded-full hover:bg-gray-100 transition"
+              className="p-1.5 rounded-full hover:bg-gray-100 transition"
               onClick={e => {
                 const next = e.currentTarget.nextSibling as HTMLElement | null;
                 next?.classList.toggle("hidden");
               }}
             >
-              <MoreHorizontal className="w-5 h-5 text-gray-500" />
+              <MoreHorizontal className="w-4 h-4 text-gray-500" />
             </button>
-            <ul className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-xl shadow-lg py-2 hidden z-10">
+            <ul className="absolute right-0 mt-2 w-36 bg-white border border-gray-200 rounded-xl shadow-lg py-1 hidden z-10">
               <li>
                 <button
                   onClick={openEditModal}
-                  className="flex items-center gap-2 px-4 py-2 w-full text-gray-700 hover:bg-gray-50 transition"
+                  className="flex items-center gap-2 px-3 py-1.5 w-full text-gray-700 hover:bg-gray-50 transition text-sm"
                 >
                   <Edit className="w-4 h-4" />
                   Editar
@@ -69,7 +68,7 @@ export function TenantCard({ tenant }: TenantCardProps) {
               <li>
                 <button
                   onClick={() => deleteTenant(tenant.id)}
-                  className="flex items-center gap-2 px-4 py-2 w-full text-red-600 hover:bg-red-50 transition"
+                  className="flex items-center gap-2 px-3 py-1.5 w-full text-red-600 hover:bg-red-50 transition text-sm"
                 >
                   <Trash2 className="w-4 h-4" />
                   Eliminar
@@ -79,42 +78,29 @@ export function TenantCard({ tenant }: TenantCardProps) {
           </div>
         </div>
 
-        {/* Tenant Info */}
-        <div className="grid grid-cols-2 gap-4 mb-4">
+        {/* Info Row */}
+        <div className="flex flex-col gap-1.5 mb-3">
           <div className="flex items-center gap-2">
-            <Info className="w-5 h-5 text-indigo-500" />
-            <div>
-              <p className="text-xs text-gray-400">Contacto de emergencia</p>
-              <p className="text-sm font-medium text-gray-900">
-                {tenant.emergency_contact ? tenant.emergency_contact : <span className="text-red-500">Sin contacto</span>}
-              </p>
-            </div>
+            <Mail className="w-4 h-4 text-blue-500" />
+            <span className="text-xs text-gray-700 truncate">
+              {tenant.email || <span className="text-red-500">Sin email</span>}
+            </span>
+            <Phone className="w-4 h-4 text-green-500 ml-3" />
+            <span className="text-xs text-gray-700 truncate">
+              {tenant.phone || <span className="text-red-500">Sin teléfono</span>}
+            </span>
           </div>
           <div className="flex items-center gap-2">
-            <Mail className="w-5 h-5 text-blue-500" />
-            <div>
-              <p className="text-xs text-gray-400">Email</p>
-              <p className="text-sm font-medium text-gray-900">
-                {tenant.email ? tenant.email : <span className="text-red-500">Sin email</span>}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Phone className="w-5 h-5 text-green-500" />
-            <div>
-              <p className="text-xs text-gray-400">Teléfono</p>
-              <p className="text-sm font-medium text-gray-900">
-                {tenant.phone ? tenant.phone : <span className="text-red-500">Sin teléfono</span>}
-              </p>
-            </div>
+            <Info className="w-4 h-4 text-indigo-500" />
+            <span className="text-xs text-gray-700 truncate">
+              {tenant.emergency_contact || <span className="text-red-500">Sin contacto</span>}
+            </span>
           </div>
         </div>
 
-        <div className="border-t my-4"></div>
-
         {/* Footer */}
         <div className="flex justify-between items-center pt-2 border-t">
-          <span className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1 rounded bg-indigo-100 text-indigo-700">
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2 py-0.5 rounded bg-gray-100 text-gray-700">
             <User2 className="w-4 h-4" />
             Inquilino
           </span>

@@ -4,7 +4,13 @@ import OcupationCard from "./OcupationCard";
 import { BedDouble, SearchX } from "lucide-react";
 import { useOcupationContext } from "@/context/OcupationContext";
 
-function OcupationsList() {
+
+interface OcupationCardProps {
+  rooms?: { id: string; number: string; price_per_night: number }[];
+  tenants?: { id: string; name: string }[];
+}
+
+function OcupationsList({ rooms = [], tenants = [] }: OcupationCardProps) {
   const { occupations, loading, error } = useOcupationContext();
 
   if (loading) {
@@ -54,7 +60,8 @@ function OcupationsList() {
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {occupations.map((occupation) => (
-          <OcupationCard key={occupation.id} occupation={occupation} />
+          <OcupationCard key={occupation.id} occupation={occupation}
+           rooms={rooms} tenants={tenants} />
         ))}
       </div>
     </div>

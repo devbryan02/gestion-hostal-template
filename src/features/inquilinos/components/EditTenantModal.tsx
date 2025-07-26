@@ -91,16 +91,6 @@ export function EditTenantModal({ isOpen, onClose, tenant }: EditTenantModalProp
                 Modifica los datos del inquilino seleccionado
               </DialogDescription>
             </div>
-            <DialogClose asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="ml-auto text-gray-500 hover:bg-gray-100"
-                disabled={loading}
-              >
-                <X className="w-5 h-5" />
-              </Button>
-            </DialogClose>
           </div>
         </DialogHeader>
 

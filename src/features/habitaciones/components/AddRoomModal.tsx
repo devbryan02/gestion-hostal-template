@@ -11,6 +11,13 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -33,6 +40,18 @@ export function AddRoomModal({ isOpen, onClose }: AddRoomModalProps) {
     description: "",
   });
 
+  // Tipos de habitaciones comunes en hoteles medianos y pequeños
+  const roomTypes = [
+    { value: "individual", label: "Individual" },
+    { value: "matrimonial", label: "Matrimonial" },
+    { value: "doble", label: "Doble" },
+    { value: "triple", label: "Triple" },
+    { value: "cuadruple", label: "Cuádruple" },
+    { value: "suite", label: "Suite" },
+    { value: "familiar", label: "Familiar" },
+    { value: "ejecutiva", label: "Ejecutiva" },
+  ];
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -51,7 +70,7 @@ export function AddRoomModal({ isOpen, onClose }: AddRoomModalProps) {
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -60,6 +79,13 @@ export function AddRoomModal({ isOpen, onClose }: AddRoomModalProps) {
         name === "price_per_night"
           ? parseFloat(value)
           : value,
+    }));
+  };
+
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [name]: value,
     }));
   };
 
@@ -81,16 +107,6 @@ export function AddRoomModal({ isOpen, onClose }: AddRoomModalProps) {
                 Completa los datos para registrar una nueva habitación
               </DialogDescription>
             </div>
-            <DialogClose asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="ml-auto text-gray-500 hover:bg-gray-100"
-                disabled={loading}
-              >
-                <X className="w-5 h-5" />
-              </Button>
-            </DialogClose>
           </div>
         </DialogHeader>
 
@@ -114,15 +130,18 @@ export function AddRoomModal({ isOpen, onClose }: AddRoomModalProps) {
               <Label htmlFor="type" className="text-gray-700 font-semibold">
                 Tipo *
               </Label>
-              <Input
-                id="type"
-                name="type"
-                value={formData.type}
-                onChange={handleChange}
-                placeholder="Ej: Doble, Matrimonial"
-                required
-                className="bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 rounded-lg"
-              />
+              <Select value={formData.type} onValueChange={(value) => handleSelectChange("type", value)}>
+                <SelectTrigger className="bg-gray-50 border-gray-200 text-gray-900 rounded-lg">
+                  <SelectValue placeholder="Selecciona un tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  {roomTypes.map((type) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="md:col-span-2">
               <Label htmlFor="price_per_night" className="text-gray-700 font-semibold">
@@ -157,18 +176,16 @@ export function AddRoomModal({ isOpen, onClose }: AddRoomModalProps) {
               <Label htmlFor="status" className="text-gray-700 font-semibold">
                 Estado *
               </Label>
-              <select
-                id="status"
-                name="status"
-                value={formData.status}
-                onChange={handleChange}
-                required
-                className="bg-gray-50 border-gray-200 text-gray-900 rounded-lg px-3 py-2"
-              >
-                <option value="disponible">Disponible</option>
-                <option value="ocupado">Ocupado</option>
-                <option value="mantenimiento">Mantenimiento</option>
-              </select>
+              <Select value={formData.status} onValueChange={(value) => handleSelectChange("status", value)}>
+                <SelectTrigger className="bg-gray-50 border-gray-200 text-gray-900 rounded-lg">
+                  <SelectValue placeholder="Selecciona un estado" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="available">Disponible</SelectItem>
+                  <SelectItem value="occupied">Ocupado</SelectItem>
+                  <SelectItem value="maintenance">Mantenimiento</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <DialogFooter className="flex flex-col md:flex-row md:justify-between items-center gap-4 mt-2">

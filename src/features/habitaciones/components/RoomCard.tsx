@@ -28,48 +28,48 @@ export function RoomCard({ room }: RoomCardProps) {
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
-      <div className="p-6">
+    <div className="bg-white border border-gray-200 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
+      <div className="p-4">
 
         {/* Header */}
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-14 h-14 bg-indigo-600 rounded-xl flex items-center justify-center shadow-md">
-              <BedDouble className="w-7 h-7 text-white" />
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center shadow-sm">
+              <BedDouble className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="font-bold text-xl text-gray-900">Hab. {room.number}</h2>
-              <span className="inline-block bg-gray-100 text-indigo-700 text-xs font-semibold px-2 py-1 rounded mt-1">{room.type}</span>
+              <h2 className="font-bold text-lg text-gray-900">Hab. {room.number}</h2>
+              <span className="inline-block bg-gray-100 text-indigo-700 text-xs font-medium px-2 py-0.5 rounded mt-0.5">{room.type}</span>
             </div>
           </div>
 
           {/* Actions Menu */}
           <div className="relative">
             <button
-              className="p-2 rounded-full hover:bg-gray-100 transition"
+              className="p-1.5 rounded-full hover:bg-gray-100 transition"
               onClick={e => {
                 const next = e.currentTarget.nextSibling as HTMLElement | null;
                 next?.classList.toggle("hidden");
               }}
             >
-              <MoreHorizontal className="w-5 h-5 text-gray-500" />
+              <MoreHorizontal className="w-4 h-4 text-gray-500" />
             </button>
-            <ul className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-xl shadow-lg py-2 hidden z-10">
+            <ul className="absolute right-0 mt-1 w-36 bg-white border border-gray-200 rounded-lg shadow-lg py-1 hidden z-10">
               <li>
                 <button
                   onClick={openEditModal}
-                  className="flex items-center gap-2 px-4 py-2 w-full text-gray-700 hover:bg-gray-50 transition"
+                  className="flex items-center gap-2 px-3 py-1.5 w-full text-sm text-gray-700 hover:bg-gray-50 transition"
                 >
-                  <Edit className="w-4 h-4" />
+                  <Edit className="w-3.5 h-3.5" />
                   Editar
                 </button>
               </li>
               <li>
                 <button
                   onClick={() => deleteRoom(room.id)}
-                  className="flex items-center gap-2 px-4 py-2 w-full text-red-600 hover:bg-red-50 transition"
+                  className="flex items-center gap-2 px-3 py-1.5 w-full text-sm text-red-600 hover:bg-red-50 transition"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-3.5 h-3.5" />
                   Eliminar
                 </button>
               </li>
@@ -78,29 +78,29 @@ export function RoomCard({ room }: RoomCardProps) {
         </div>
 
         {/* Room Info */}
-        <div className="grid grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-2 gap-3 mb-3">
           <div className="flex items-center gap-2">
-            <Info className="w-5 h-5 text-indigo-500" />
+            <Info className="w-4 h-4 text-indigo-500" />
             <div>
               <p className="text-xs text-gray-400">Estado</p>
               <p className="text-sm font-medium capitalize text-gray-900">{room.status}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <DollarSign className="w-5 h-5 text-green-500" />
+            <DollarSign className="w-4 h-4 text-green-500" />
             <div>
-              <p className="text-xs text-gray-400">Precio por noche</p>
+              <p className="text-xs text-gray-400">Precio/noche</p>
               <p className="text-sm font-medium text-gray-900">S/ {room.price_per_night}</p>
             </div>
           </div>
         </div>
 
-        <div className="border-t my-4"></div>
+        <div className="border-t my-3"></div>
 
         {/* Description */}
-        <div className="mb-4">
+        <div className="mb-3">
           <p className="text-xs text-gray-400 mb-1">Descripción</p>
-          <p className="text-sm text-gray-700">
+          <p className="text-sm text-gray-700 line-clamp-2">
             {room.description ? room.description : <span className="text-red-500">Sin descripción</span>}
           </p>
         </div>
@@ -108,7 +108,7 @@ export function RoomCard({ room }: RoomCardProps) {
         {/* Footer */}
         <div className="flex justify-between items-center pt-2 border-t">
           <span
-            className={`inline-flex items-center gap-2 text-xs font-semibold px-3 py-1 rounded
+            className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full
               ${room.status === "available"
                 ? "bg-green-100 text-green-700"
                 : room.status === "occupied"
@@ -120,7 +120,7 @@ export function RoomCard({ room }: RoomCardProps) {
             `}
           >
             <div
-              className={`w-2 h-2 rounded-full
+              className={`w-1.5 h-1.5 rounded-full
           ${room.status === "available"
                   ? "bg-green-700"
                   : room.status === "occupied"
@@ -142,7 +142,7 @@ export function RoomCard({ room }: RoomCardProps) {
             }
           </span>
           <span className="text-xs text-gray-400 flex items-center gap-1">
-            <Calendar className="w-4 h-4" />
+            <Calendar className="w-3.5 h-3.5" />
             {formattedCreated}
           </span>
         </div>
