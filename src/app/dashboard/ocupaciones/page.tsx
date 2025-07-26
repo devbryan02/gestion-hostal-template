@@ -1,9 +1,5 @@
-function OcupacionesPage() {
-    return (
-        <div>
-            <h1>Ocupaciones</h1>
-        </div>
-    );
-}
+import OcupationsClient from "@/features/ocupaciones/components/OcupationsClient";
 
-export default OcupacionesPage;
+export default async function OcupacionesPage() {
+    return <OcupationsClient />;
+}

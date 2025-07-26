@@ -47,9 +47,9 @@ export interface Occupation {
   created_at: ISODateTime;
   updated_at: ISODateTime;
 
-  // Relaciones opcionales 
-  room?: Room;
-  tenant?: Tenant;
+  // Relaciones
+  room: Room;
+  tenant: Tenant;
 }
 
 // DashboardStats (para KPIs del dashboard)
