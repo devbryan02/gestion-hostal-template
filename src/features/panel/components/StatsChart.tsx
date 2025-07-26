@@ -1,58 +1,52 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
+import { BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, LabelList } from "recharts";
 import { CalendarCheck } from "lucide-react";
 import { useStatsContext } from "@/context/StatsContext";
 
 export function StatsChart() {
   const { stats } = useStatsContext();
-
-  // Simulamos un solo mes, pero puedes expandir esto si tienes más datos históricos
-// Suponiendo que stats.monthlyRevenue es solo para el mes actual,
-// y no tienes datos de meses anteriores, puedes mostrar los últimos tres meses
-// con 0 en los meses sin datos.
-const currentMonth = new Date().getMonth();
-const months = [
-    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
-];
-
-const chartData = [
-    {
-        name: months[(currentMonth + 10) % 12], // Hace dos meses
-        Ingresos: 0,
-    },
-    {
-        name: months[(currentMonth + 11) % 12], // Mes pasado
-        Ingresos: 0,
-    },
-    {
-        name: months[currentMonth], // Mes actual
-        Ingresos: stats.monthlyRevenue,
-    },
-];
+  const chartData = stats.monthlyRevenues ?? [];
 
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-base font-medium flex items-center gap-2">
+        <CardTitle className="text-base font-bold flex items-center gap-2">
           <CalendarCheck className="w-5 h-5 text-indigo-600" />
-          Ingresos del mes actual
+          Ingresos mensuales del año
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-64">
+        <div className="h-72">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={chartData}>
-              <XAxis dataKey="name" />
-              <YAxis />
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+              <XAxis dataKey="mes" tick={{ fontSize: 13 }} />
+              <YAxis
+                tickFormatter={value => `S/ ${value.toLocaleString("es-PE")}`}
+                tick={{ fontSize: 13 }}
+              />
               <Tooltip
                 formatter={(value: number) =>
                   `S/ ${value.toLocaleString("es-PE", { minimumFractionDigits: 2 })}`
                 }
+                labelClassName="font-bold"
+                contentStyle={{ background: "#fff", borderRadius: 8, border: "1px solid #e5e7eb" }}
               />
-              <Bar dataKey="Ingresos" fill="#059669" radius={[8, 8, 0, 0]} />
+              <Bar dataKey="ingresos" fill="#059669" radius={[8, 8, 0, 0]}>
+                <LabelList
+                  dataKey="ingresos"
+                  position="top"
+                  formatter={(label: React.ReactNode) => {
+                    if (typeof label === "number") {
+                      return `S/ ${label.toLocaleString("es-PE", { minimumFractionDigits: 0 })}`;
+                    }
+                    return label;
+                  }}
+                  style={{ fontWeight: 700, fontSize: 12, fill: "#059669" }}
+                />
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>

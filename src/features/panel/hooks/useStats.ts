@@ -18,6 +18,14 @@ export function useStats() {
     totalTenants: 0,
     activeOccupations: 0,
     monthlyRevenue: 0,
+    previousMonthlyRevenue: 0,
+    monthlyRevenues: Array.from({ length: 12 }, (_, i) => ({
+      mes: [
+        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+      ][i],
+      ingresos: 0,
+    })),
   });
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");

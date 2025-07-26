@@ -10,7 +10,6 @@ export interface CreateOccupationRequest {
     check_in_date: string;
     planned_check_out: string;
     price_per_night: number;
-    total_amount?: number; 
     status?: OccupationStatus;
     notes?: string;
 }
@@ -22,7 +21,6 @@ export interface UpdateOccupationRequest {
     check_in_date?: string;
     planned_check_out?: string;
     price_per_night: number;
-    total_amount?: number;
     status?: OccupationStatus;
     notes?: string;
     check_out_date?: string;
@@ -49,7 +47,8 @@ export class OcupationService {
         room:rooms(*),
         tenant:tenants(*)
       `)
-            .order("created_at", { ascending: false });
+            .order("created_at", { ascending: false })
+            .limit(10);
 
         if (error) throw new Error(`Error fetching occupations: ${error.message}`);
         return data as Occupation[];
@@ -65,7 +64,8 @@ export class OcupationService {
         tenant:tenants(*)
       `)
             .eq("status", status)
-            .order("created_at", { ascending: false });
+            .order("created_at", { ascending: false })
+            .limit(10);
 
         if (error) throw new Error(`Error filtering occupations: ${error.message}`);
         return data as Occupation[];

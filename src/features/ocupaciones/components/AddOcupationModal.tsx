@@ -16,7 +16,6 @@ import { CalendarIcon } from "lucide-react";
 import { CreateOccupationRequest } from "../service/OcupationService";
 import { RoomSelect } from "./RoomSelect";
 import { TenantSelect } from "./TenantSelect";
-import { differenceInCalendarDays, parseISO } from "date-fns";
 import Swal from "sweetalert2";
 
 interface AddOcupationModalProps {
@@ -108,21 +107,8 @@ export function AddOcupationModal({ isOpen, onClose, rooms, tenants }: AddOcupat
       });
       return;
     }
-      const nights =
-        formData.check_in_date && formData.planned_check_out
-          ? differenceInCalendarDays(
-            parseISO(formData.planned_check_out),
-            parseISO(formData.check_in_date)
-          )
-          : 0;
 
-      // Calcular total_amount
-      const total_amount = formData.price_per_night * (nights > 0 ? nights : 1);
-
-      await createOccupation({
-        ...formData,
-        total_amount,
-      });
+      await createOccupation({...formData,});
 
       setFormData({
         room_id: "",
@@ -132,7 +118,6 @@ export function AddOcupationModal({ isOpen, onClose, rooms, tenants }: AddOcupat
         price_per_night: 0,
         status: "active",
         notes: "",
-        total_amount: 0,
       });
       setCheckInDate(undefined);
       setPlannedCheckOutDate(undefined);

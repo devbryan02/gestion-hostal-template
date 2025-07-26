@@ -60,4 +60,6 @@ export interface DashboardStats {
   totalTenants: number;
   activeOccupations: number;
   monthlyRevenue: number;
+  previousMonthlyRevenue: number;
+  monthlyRevenues: { mes: string; ingresos: number }[]; 
 }
