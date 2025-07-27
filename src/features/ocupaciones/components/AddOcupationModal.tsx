@@ -108,6 +108,19 @@ export function AddOcupationModal({ isOpen, onClose, rooms, tenants }: AddOcupat
       return;
     }
 
+    if (!formData.room_id || !formData.tenant_id) {
+      Swal.fire({
+        toast: true,
+        icon: "error",
+        title: "Debes seleccionar la habitación y el inquilino.",
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+      });
+      return;
+    }
+
       await createOccupation({...formData,});
 
       setFormData({
