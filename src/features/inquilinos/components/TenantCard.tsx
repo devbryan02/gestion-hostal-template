@@ -1,20 +1,25 @@
 "use client";
 
-import { Tenant } from "@/types";
-import { User2, Edit, Trash2, MoreHorizontal, Calendar, Info, Mail, Phone } from "lucide-react";
+import { Tenant, TenantWithOccupations } from "@/types";
+import { User2, Edit, Trash2, MoreHorizontal, Calendar, Info, Mail, Phone, Award, Home } from "lucide-react";
 import { useState } from "react";
 import { useTenantContext } from "@/context/TenantContext";
 import EditTenantModal from "./EditTenantModal";
 
 export interface TenantCardProps {
-  tenant: Tenant;
+  tenant: Tenant | TenantWithOccupations;
+  onRentTo?: (tenantId: string) => void;
 }
 
-export function TenantCard({ tenant }: TenantCardProps) {
+export function TenantCard({ tenant, onRentTo }: TenantCardProps) {
   const [isEditModalOpen, setEditModalOpen] = useState(false);
   const [selectedTenant, setSelectedTenant] = useState<Tenant | null>(null);
 
   const { deleteTenant } = useTenantContext();
+
+  // Verificar si es TenantWithOccupations
+  const isRecurrentTenant = 'occupation_count' in tenant;
+  const occupationCount = isRecurrentTenant ? tenant.occupation_count : 0;
 
   const formattedCreated = new Date(tenant.created_at).toLocaleDateString("es-ES", {
     year: "numeric",
@@ -38,7 +43,16 @@ export function TenantCard({ tenant }: TenantCardProps) {
               <User2 className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h2 className="font-bold text-base text-gray-900">{tenant.name}</h2>
+              <div className="flex items-center gap-2">
+                <h2 className="font-bold text-base text-gray-900">{tenant.name}</h2>
+                {/* Badge para inquilinos recurrentes */}
+                {isRecurrentTenant && occupationCount >= 3 && (
+                  <div className="flex items-center gap-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                    <Award className="w-3 h-3" />
+                    VIP
+                  </div>
+                )}
+              </div>
               <span className="inline-block bg-gray-100 text-indigo-700 text-xs font-semibold px-2 py-0.5 rounded mt-0.5">
                 {tenant.document_type} - {tenant.document_number}
               </span>
@@ -65,6 +79,17 @@ export function TenantCard({ tenant }: TenantCardProps) {
                   Editar
                 </button>
               </li>
+              {onRentTo && (
+                <li>
+                  <button
+                    onClick={() => onRentTo(tenant.id)}
+                    className="flex items-center gap-2 px-3 py-1.5 w-full text-green-600 hover:bg-green-50 transition text-sm"
+                  >
+                    <Home className="w-4 h-4" />
+                    Alquilar
+                  </button>
+                </li>
+              )}
               <li>
                 <button
                   onClick={() => deleteTenant(tenant.id)}
@@ -77,6 +102,33 @@ export function TenantCard({ tenant }: TenantCardProps) {
             </ul>
           </div>
         </div>
+
+        {/* Información de ocupaciones - solo cuando está en vista recurrente */}
+        {isRecurrentTenant && (
+          <div className="mb-3">
+            <div className="flex items-center justify-between p-2 bg-indigo-50 rounded-lg border border-indigo-200">
+              <div className="flex items-center gap-2">
+                <Award className="w-4 h-4 text-indigo-600" />
+                <div>
+                  <p className="text-xs text-indigo-600 font-medium">Ocupaciones registradas</p>
+                  <p className="text-lg font-bold text-indigo-900">{occupationCount}</p>
+                </div>
+              </div>
+              {isRecurrentTenant && tenant.last_occupation_date && (
+                <div className="text-right">
+                  <p className="text-xs text-indigo-600">Última visita</p>
+                  <p className="text-xs font-semibold text-indigo-900">
+                    {new Date(tenant.last_occupation_date).toLocaleDateString("es-ES", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric"
+                    })}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Info Row */}
         <div className="flex flex-col gap-1.5 mb-3">

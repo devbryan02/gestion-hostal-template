@@ -32,6 +32,12 @@ export interface Tenant {
   updated_at: ISODateTime;
 }
 
+// Tenant with occupation count (para mostrar inquilinos más recurrentes)
+export interface TenantWithOccupations extends Tenant {
+  occupation_count: number;
+  last_occupation_date?: ISODate;
+}
+
 // Occupation (ocupaciones/reservas)
 export interface Occupation {
   id: string;
@@ -50,6 +56,15 @@ export interface Occupation {
   // Relaciones
   room: Room;
   tenant: Tenant;
+}
+
+// Room with tenant info (para mostrar inquilino cuando está ocupada)
+export interface RoomWithTenant extends Room {
+  current_tenant?: {
+    id: string;
+    name: string;
+    document_number: string;
+  };
 }
 
 // DashboardStats (para KPIs del dashboard)

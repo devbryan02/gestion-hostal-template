@@ -4,7 +4,11 @@ import TenantCard from "./TenantCard";
 import { User2, SearchX } from "lucide-react";
 import { useTenantContext } from "@/context/TenantContext";
 
-function TenantsList() {
+interface TenantsListProps {
+  onRentTo?: (tenantId: string) => void;
+}
+
+function TenantsList({ onRentTo }: TenantsListProps) {
   const { tenants, loading, error } = useTenantContext();
 
   if (loading) {
@@ -57,7 +61,11 @@ function TenantsList() {
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {tenants.map((tenant) => (
-          <TenantCard key={tenant.id} tenant={tenant} />
+          <TenantCard 
+            key={tenant.id} 
+            tenant={tenant} 
+            onRentTo={onRentTo}
+          />
         ))}
       </div>
     </div>

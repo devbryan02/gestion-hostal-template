@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useOcupationContext } from "@/context/OcupationContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -23,14 +23,23 @@ interface AddOcupationModalProps {
   onClose: () => void;
   rooms: { id: string; number: string; price_per_night: number }[];
   tenants: { id: string; name: string }[];
+  preSelectedTenantId?: string;
+  preSelectedRoomId?: string;
 }
 
-export function AddOcupationModal({ isOpen, onClose, rooms, tenants }: AddOcupationModalProps) {
+export function AddOcupationModal({ 
+  isOpen, 
+  onClose, 
+  rooms, 
+  tenants,
+  preSelectedTenantId,
+  preSelectedRoomId 
+}: AddOcupationModalProps) {
   const { createOccupation, loading } = useOcupationContext();
 
   const [formData, setFormData] = useState<CreateOccupationRequest>({
-    room_id: "",
-    tenant_id: "",
+    room_id: preSelectedRoomId || "",
+    tenant_id: preSelectedTenantId || "",
     check_in_date: "",
     planned_check_out: "",
     price_per_night: 0,
@@ -40,6 +49,20 @@ export function AddOcupationModal({ isOpen, onClose, rooms, tenants }: AddOcupat
 
   const [checkInDate, setCheckInDate] = useState<Date>();
   const [plannedCheckOutDate, setPlannedCheckOutDate] = useState<Date>();
+
+  // Obtener nombres para mostrar en el título del modal
+  const preSelectedTenant = preSelectedTenantId ? tenants.find(t => t.id === preSelectedTenantId) : null;
+  const preSelectedRoom = preSelectedRoomId ? rooms.find(r => r.id === preSelectedRoomId) : null;
+
+  // Effect para actualizar el precio cuando se preselecciona una habitación
+  useEffect(() => {
+    if (preSelectedRoomId && preSelectedRoom) {
+      setFormData(prev => ({
+        ...prev,
+        price_per_night: preSelectedRoom.price_per_night,
+      }));
+    }
+  }, [preSelectedRoomId, preSelectedRoom]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -145,7 +168,9 @@ export function AddOcupationModal({ isOpen, onClose, rooms, tenants }: AddOcupat
       <DialogContent className="max-w-2xl bg-white text-gray-900 border border-gray-200 shadow-2xl rounded-2xl px-8 py-6">
         <DialogHeader>
           <DialogTitle className="text-2xl font-extrabold tracking-tight text-gray-900">
-            Nueva Ocupación
+            {preSelectedTenant ? `Alquilar a ${preSelectedTenant.name}` : 
+             preSelectedRoom ? `Ocupar Habitación ${preSelectedRoom.number}` : 
+             "Nueva Ocupación"}
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -157,7 +182,13 @@ export function AddOcupationModal({ isOpen, onClose, rooms, tenants }: AddOcupat
                 value={formData.room_id}
                 onValueChange={handleRoomSelect}
                 placeholder="Buscar habitación..."
+                disabled={!!preSelectedRoomId}
               />
+              {preSelectedRoom && (
+                <p className="text-xs text-indigo-600 mt-1">
+                  ✓ Habitación {preSelectedRoom.number} preseleccionada
+                </p>
+              )}
             </div>
 
             <div>
@@ -167,7 +198,13 @@ export function AddOcupationModal({ isOpen, onClose, rooms, tenants }: AddOcupat
                 value={formData.tenant_id}
                 onValueChange={handleTenantSelect}
                 placeholder="Buscar inquilino..."
+                disabled={!!preSelectedTenantId}
               />
+              {preSelectedTenant && (
+                <p className="text-xs text-indigo-600 mt-1">
+                  ✓ {preSelectedTenant.name} preseleccionado
+                </p>
+              )}
             </div>
 
             <div>

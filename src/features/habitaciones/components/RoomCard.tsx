@@ -1,16 +1,17 @@
 "use client";
 
-import { Room } from "@/types";
-import { BedDouble, Edit, Trash2, MoreHorizontal, Calendar, DollarSign, Info } from "lucide-react";
+import { RoomWithTenant, Room } from "@/types";
+import { BedDouble, Edit, Trash2, MoreHorizontal, Calendar, DollarSign, Info, User, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { useRoomContext } from "@/context/RoomContext";
 import { EditRoomModal } from "./EditRoomModal";
 
 export interface RoomCardProps {
-  room: Room;
+  room: RoomWithTenant;
+  onOccupy?: (roomId: string) => void;
 }
 
-export function RoomCard({ room }: RoomCardProps) {
+export function RoomCard({ room, onOccupy }: RoomCardProps) {
   const [isEditModalOpen, setEditModalOpen] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
 
@@ -64,6 +65,17 @@ export function RoomCard({ room }: RoomCardProps) {
                   Editar
                 </button>
               </li>
+              {onOccupy && room.status === 'available' && (
+                <li>
+                  <button
+                    onClick={() => onOccupy(room.id)}
+                    className="flex items-center gap-2 px-3 py-1.5 w-full text-sm text-blue-600 hover:bg-blue-50 transition"
+                  >
+                    <UserPlus className="w-3.5 h-3.5" />
+                    Ocupar
+                  </button>
+                </li>
+              )}
               <li>
                 <button
                   onClick={() => deleteRoom(room.id)}
@@ -94,6 +106,20 @@ export function RoomCard({ room }: RoomCardProps) {
             </div>
           </div>
         </div>
+
+        {/* Inquilino info - solo cuando está ocupada */}
+        {room.status === 'occupied' && room.current_tenant && (
+          <div className="mb-3">
+            <div className="flex items-center gap-2 p-2 bg-blue-50 rounded-lg border border-blue-200">
+              <User className="w-4 h-4 text-blue-500" />
+              <div>
+                <p className="text-xs text-blue-600 font-medium">Inquilino actual</p>
+                <p className="text-sm font-semibold text-blue-900">{room.current_tenant.name}</p>
+                <p className="text-xs text-blue-700">Doc: {room.current_tenant.document_number}</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="border-t my-3"></div>
 

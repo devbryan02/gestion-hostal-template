@@ -16,9 +16,10 @@ interface TenantSelectProps {
   onValueChange: (value: string) => void;
   placeholder?: string;
   className?: string;
+  disabled?: boolean;
 }
 
-export function TenantSelect({ tenants, value, onValueChange, placeholder = "Seleccionar inquilino", className }: TenantSelectProps) {
+export function TenantSelect({ tenants, value, onValueChange, placeholder = "Seleccionar inquilino", className, disabled = false }: TenantSelectProps) {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -49,14 +50,16 @@ export function TenantSelect({ tenants, value, onValueChange, placeholder = "Sel
   };
 
   return (
-    <Popover open={open} onOpenChange={handleOpenChange}>
+    <Popover open={open && !disabled} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
           role="combobox"
           aria-expanded={open}
+          disabled={disabled}
           className={cn(
             "w-full justify-between bg-gray-50 border-gray-200 text-gray-900 rounded-lg hover:bg-gray-100",
+            disabled && "opacity-60 cursor-not-allowed bg-gray-100",
             className
           )}
         >

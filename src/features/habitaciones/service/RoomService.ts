@@ -1,8 +1,19 @@
 import { createClient } from "@/lib/supabase/client";
-import { Room, RoomStatus } from "@/types/index";
+import { Room, RoomStatus, RoomWithTenant } from "@/types/index";
 
 const supabase = createClient();
 const TABLE_NAME = "rooms";
+
+// Tipo temporal para las ocupaciones con tenant en las consultas
+interface OccupationWithTenant {
+    id: string;
+    status: string;
+    tenant: {
+        id: string;
+        name: string;
+        document_number: string;
+    };
+}
 
 export interface CreateRoomRequest {
     number: string;
@@ -36,42 +47,114 @@ export interface DeleteRoomResponse {
 }
 
 export class RoomService {
-    // Obtener primeras 10 habitaciones
-    async fetchFirst10(): Promise<Room[]> {
+    // Obtener todas las habitaciones con información del inquilino cuando está ocupada
+    async fetchAllWithTenantInfo(): Promise<RoomWithTenant[]> {
         const { data, error } = await supabase
             .from(TABLE_NAME)
-            .select("*")
-            .order("created_at", { ascending: false })
-            .limit(10);
+            .select(`
+                *,
+                occupations!left(
+                    id,
+                    status,
+                    tenant:tenants(
+                        id,
+                        name,
+                        document_number
+                    )
+                )
+            `)
+            .eq('occupations.status', 'active')
+            .order("created_at", { ascending: false });
 
         if (error) throw new Error(`Error fetching rooms: ${error.message}`);
-        return data as Room[];
+
+        // Formatear los resultados para incluir current_tenant solo cuando hay ocupación activa
+        const roomsWithTenant = (data || []).map(room => {
+            const activeOccupation = room.occupations?.[0]; // Solo habrá una ocupación activa por habitación
+            return {
+                ...room,
+                occupations: undefined, // Remover la propiedad occupations del resultado
+                current_tenant: activeOccupation?.tenant || undefined
+            };
+        });
+
+        return roomsWithTenant as RoomWithTenant[];
+    }
+
+    // Obtener primeras 10 habitaciones con información del inquilino cuando está ocupada
+    async fetchFirst10(): Promise<RoomWithTenant[]> {
+        const allRooms = await this.fetchAllWithTenantInfo();
+        return allRooms.slice(0, 10);
     }
 
     // Buscar por número o tipo
-    async searchByText(text: string): Promise<Room[]> {
+    async searchByText(text: string): Promise<RoomWithTenant[]> {
         const query = `number.ilike.%${text}%,type.ilike.%${text}%`;
 
         const { data, error } = await supabase
             .from(TABLE_NAME)
-            .select("*")
+            .select(`
+                *,
+                occupations!left(
+                    id,
+                    status,
+                    tenant:tenants(
+                        id,
+                        name,
+                        document_number
+                    )
+                )
+            `)
             .or(query)
             .limit(10);
 
         if (error) throw new Error(`Error searching rooms: ${error.message}`);
-        return data as Room[];
+
+        // Formatear los resultados
+        const roomsWithTenant = (data || []).map(room => {
+            const activeOccupation = (room.occupations as OccupationWithTenant[])?.find(occ => occ.status === 'active');
+            return {
+                ...room,
+                occupations: undefined,
+                current_tenant: activeOccupation?.tenant || undefined
+            };
+        });
+
+        return roomsWithTenant as RoomWithTenant[];
     }
     
     // Filtrar habitaciones por estado
-    async fetchByStatus(status: RoomStatus): Promise<Room[]> {
+    async fetchByStatus(status: RoomStatus): Promise<RoomWithTenant[]> {
         const { data, error } = await supabase
             .from(TABLE_NAME)
-            .select("*")
+            .select(`
+                *,
+                occupations!left(
+                    id,
+                    status,
+                    tenant:tenants(
+                        id,
+                        name,
+                        document_number
+                    )
+                )
+            `)
             .eq("status", status)
             .order("number", { ascending: true });
 
         if (error) throw new Error(`Error fetching rooms by status: ${error.message}`);
-        return data as Room[];
+
+        // Formatear los resultados
+        const roomsWithTenant = (data || []).map(room => {
+            const activeOccupation = (room.occupations as OccupationWithTenant[])?.find(occ => occ.status === 'active');
+            return {
+                ...room,
+                occupations: undefined,
+                current_tenant: activeOccupation?.tenant || undefined
+            };
+        });
+
+        return roomsWithTenant as RoomWithTenant[];
     }
 
 

@@ -4,7 +4,11 @@ import { RoomCard } from "./RoomCard";
 import { BedDouble, SearchX } from "lucide-react";
 import { useRoomContext } from "@/context/RoomContext";
 
-export function RoomsList() {
+interface RoomsListProps {
+  onOccupy?: (roomId: string) => void;
+}
+
+export function RoomsList({ onOccupy }: RoomsListProps) {
   const { rooms, loading, error } = useRoomContext();
 
   if (loading) {
@@ -58,7 +62,11 @@ export function RoomsList() {
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {rooms.map((room) => (
-          <RoomCard key={room.id} room={room} />
+          <RoomCard 
+            key={room.id} 
+            room={room} 
+            onOccupy={onOccupy}
+          />
         ))}
       </div>
     </div>

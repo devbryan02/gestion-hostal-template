@@ -1,8 +1,19 @@
 import { createClient } from "@/lib/supabase/client";
-import { Tenant, DocumentType } from "@/types/index";
+import { Tenant, TenantWithOccupations, DocumentType } from "@/types/index";
 
 const supabase = createClient();
 const TABLE_NAME = "tenants";
+
+// Tipo temporal para las ocupaciones en las consultas
+interface OccupationData {
+    id: string;
+    check_in_date: string;
+}
+
+// Tipo temporal para tenant con ocupaciones de Supabase
+interface TenantWithOccupationsData extends Tenant {
+    occupations: OccupationData[];
+}
 
 export interface CreateTenantRequest {
     name: string;
@@ -38,7 +49,62 @@ export interface DeleteTenantResponse {
 }
 
 export class TenantService {
-    // Obtener primeros 10 inquilinos
+    // Obtener inquilinos con contador de ocupaciones (más recurrentes primero)
+    async fetchWithOccupationCount(): Promise<TenantWithOccupations[]> {
+        const { data, error } = await supabase
+            .from(TABLE_NAME)
+            .select(`
+                *,
+                occupations(
+                    id,
+                    check_in_date
+                )
+            `)
+            .order("created_at", { ascending: false });
+
+        if (error) throw new Error(`Error fetching tenants with occupations: ${error.message}`);
+
+        // Procesar los datos para contar ocupaciones y encontrar la última fecha
+        const tenantsWithCount = (data || []).map((tenant: TenantWithOccupationsData) => {
+            const occupations = tenant.occupations || [];
+            const occupationCount = occupations.length;
+            
+            // Encontrar la fecha de la última ocupación
+            const lastOccupationDate = occupations.length > 0 
+                ? occupations
+                    .map((occ: OccupationData) => occ.check_in_date)
+                    .sort((a: string, b: string) => new Date(b).getTime() - new Date(a).getTime())[0]
+                : undefined;
+
+            return {
+                ...tenant,
+                occupations: undefined, // Remover occupations del resultado
+                occupation_count: occupationCount,
+                last_occupation_date: lastOccupationDate
+            };
+        });
+
+        // Ordenar por número de ocupaciones descendente, luego por última ocupación
+        return tenantsWithCount
+            .sort((a: TenantWithOccupations, b: TenantWithOccupations) => {
+                if (b.occupation_count !== a.occupation_count) {
+                    return b.occupation_count - a.occupation_count;
+                }
+                // Si tienen el mismo número de ocupaciones, ordenar por fecha más reciente
+                if (a.last_occupation_date && b.last_occupation_date) {
+                    return new Date(b.last_occupation_date).getTime() - new Date(a.last_occupation_date).getTime();
+                }
+                return 0;
+            }) as TenantWithOccupations[];
+    }
+
+    // Obtener primeros 10 inquilinos más recurrentes
+    async fetchTop10Recurrent(): Promise<TenantWithOccupations[]> {
+        const allTenants = await this.fetchWithOccupationCount();
+        return allTenants.slice(0, 10);
+    }
+
+    // Obtener primeros 10 inquilinos (comportamiento original)
     async fetchFirst10(): Promise<Tenant[]> {
         const { data, error } = await supabase
             .from(TABLE_NAME)

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CreateTenantRequest, TenantService, UpdateTenantRequest } from "../service/TenantService";
-import { Tenant } from "@/types";
+import { Tenant, TenantWithOccupations } from "@/types";
 import Swal from "sweetalert2";
 
 function getErrorMessage(error: unknown): string {
@@ -12,9 +12,10 @@ function getErrorMessage(error: unknown): string {
 
 export function useTenants() {
     
-    const [tenants, setTenants] = useState<Tenant[]>([]);
+    const [tenants, setTenants] = useState<(Tenant | TenantWithOccupations)[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string>("");
+    const [isRecurrentView, setIsRecurrentView] = useState<boolean>(false);
 
     const tenantService = useMemo(() => new TenantService(), []);
 
@@ -23,6 +24,20 @@ export function useTenants() {
             setLoading(true);
             const data = await tenantService.fetchFirst10();
             setTenants(data);
+            setIsRecurrentView(false);
+        } catch (err) {
+            setError(getErrorMessage(err));
+        } finally {
+            setLoading(false);
+        }
+    }, [tenantService]);
+
+    const fetchRecurrentTenants = useCallback(async () => {
+        try {
+            setLoading(true);
+            const data = await tenantService.fetchWithOccupationCount();
+            setTenants(data);
+            setIsRecurrentView(true);
         } catch (err) {
             setError(getErrorMessage(err));
         } finally {
@@ -46,7 +61,17 @@ export function useTenants() {
         try {
             setLoading(true);
             const response = await tenantService.create(payload);
-            setTenants(prev => [...prev, response.data]);
+            // Si estamos en vista recurrente, agregar con occupation_count: 0
+            if (isRecurrentView) {
+                const tenantWithOccupations: TenantWithOccupations = {
+                    ...response.data,
+                    occupation_count: 0,
+                    last_occupation_date: undefined
+                };
+                setTenants(prev => [...prev, tenantWithOccupations]);
+            } else {
+                setTenants(prev => [...prev, response.data]);
+            }
             return response;
         } catch (err) {
             const message = getErrorMessage(err);
@@ -55,7 +80,7 @@ export function useTenants() {
         } finally {
             setLoading(false);
         }
-    }, [tenantService]);
+    }, [tenantService, isRecurrentView]);
 
     const updateTenant = useCallback(async (payload: UpdateTenantRequest) => {
         try {
@@ -105,7 +130,9 @@ export function useTenants() {
         tenants,
         loading,
         error,
+        isRecurrentView,
         fetchTenants,
+        fetchRecurrentTenants,
         searchTenants,
         createTenant,
         updateTenant,

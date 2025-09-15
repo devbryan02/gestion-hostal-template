@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CreateRoomRequest, RoomService, UpdateRoomRequest } from "../service/RoomService";
-import { Room, RoomStatus } from "@/types";
+import { RoomWithTenant, RoomStatus } from "@/types";
 import Swal from "sweetalert2";
 
 function getErrorMessage(error: unknown): string {
@@ -13,7 +13,7 @@ function getErrorMessage(error: unknown): string {
 export function useRooms() {
     
     // Estado para manejar habitaciones, loading y error
-    const [rooms, setRooms] = useState<Room[]>([]);
+    const [rooms, setRooms] = useState<RoomWithTenant[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string>("");
 
@@ -64,7 +64,9 @@ export function useRooms() {
         try {
             setLoading(true);
             const response = await roomService.create(payload);
-            setRooms(prev => [...prev, response.data]);
+            // Convertir Room a RoomWithTenant agregando current_tenant: undefined
+            const roomWithTenant: RoomWithTenant = { ...response.data, current_tenant: undefined };
+            setRooms(prev => [...prev, roomWithTenant]);
             return response;
         } catch (err) {
             const message = getErrorMessage(err);
@@ -79,7 +81,13 @@ export function useRooms() {
         try {
             setLoading(true);
             const response = await roomService.update(payload);
-            setRooms(prev => prev.map(room => room.id === response.data.id ? response.data : room));
+            setRooms(prev => prev.map(room => {
+                if (room.id === response.data.id) {
+                    // Mantener la información del inquilino actual si existe
+                    return { ...response.data, current_tenant: room.current_tenant };
+                }
+                return room;
+            }));
             return response;
         } catch (err) {
             const message = getErrorMessage(err);

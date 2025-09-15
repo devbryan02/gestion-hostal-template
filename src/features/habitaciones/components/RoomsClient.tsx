@@ -8,13 +8,29 @@ import { RoomsList } from "./RoomsList";
 import { RoomProvider } from "@/context/RoomContext";
 import { useRoomContext } from "@/context/RoomContext";
 import { Button } from "@/components/ui/button";
+import { AddOcupationModal } from "../../ocupaciones/components/AddOcupationModal";
+import { OcupationProvider } from "@/context/OcupationContext";
+import { TenantProvider, useTenantContext } from "@/context/TenantContext";
 
 const RoomsContent = () => {
   const { rooms, loading, error } = useRoomContext();
+  const { tenants } = useTenantContext();
   const [isAddModalOpen, setAddModalOpen] = useState(false);
+  const [isOccupyModalOpen, setOccupyModalOpen] = useState(false);
+  const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
 
   const openAddModal = () => setAddModalOpen(true);
   const closeAddModal = () => setAddModalOpen(false);
+
+  const handleOccupy = (roomId: string) => {
+    setSelectedRoomId(roomId);
+    setOccupyModalOpen(true);
+  };
+
+  const closeOccupyModal = () => {
+    setOccupyModalOpen(false);
+    setSelectedRoomId(null);
+  };
 
   return (
     <div className="space-y-4">
@@ -77,21 +93,36 @@ const RoomsContent = () => {
                 {rooms?.length || 0} resultados
               </span>
             </div>
-            <RoomsList />
+            <RoomsList onOccupy={handleOccupy} />
           </div>
         )}
       </div>
 
       {/* Add Room Modal */}
       <AddRoomModal isOpen={isAddModalOpen} onClose={closeAddModal} />
+
+      {/* Occupy Modal */}
+      {selectedRoomId && (
+        <AddOcupationModal 
+          isOpen={isOccupyModalOpen} 
+          onClose={closeOccupyModal}
+          preSelectedRoomId={selectedRoomId}
+          rooms={rooms}
+          tenants={tenants}
+        />
+      )}
     </div>
   );
 };
 
 export default function RoomsClient() {
   return (
-    <RoomProvider>
-      <RoomsContent />
-    </RoomProvider>
+    <TenantProvider>
+      <OcupationProvider>
+        <RoomProvider>
+          <RoomsContent />
+        </RoomProvider>
+      </OcupationProvider>
+    </TenantProvider>
   );
 }

@@ -46,6 +46,16 @@ export function useOcupations() {
       setLoading(true);
       const response = await ocupationService.create(payload);
       setOccupations(prev => [response.data, ...prev]);
+      Swal.fire({
+        title: "Ocupación creada",
+        text: `La habitación ${response.data.room.number} ha sido ocupada.`,
+        icon: "success",
+        toast: true,
+        position: "bottom-end",
+        showConfirmButton: false,
+        timer: 4000,
+        timerProgressBar: true,
+      });
       return response;
     } catch (err) {
       const message = getErrorMessage(err);

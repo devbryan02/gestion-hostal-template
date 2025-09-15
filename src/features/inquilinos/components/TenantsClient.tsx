@@ -6,14 +6,31 @@ import AddTenantModal from "./AddTenantModal";
 import TenantFilters from "./TenantFilters";
 import TenantsList from "./TenantsList";
 import { TenantProvider, useTenantContext } from "@/context/TenantContext";
+import { useRoomContext } from "@/context/RoomContext";
 import { Button } from "@/components/ui/button";
+import { AddOcupationModal } from "../../ocupaciones/components/AddOcupationModal";
+import { OcupationProvider } from "@/context/OcupationContext";
+import { RoomProvider } from "@/context/RoomContext";
 
 const TenantsContent = () => {
   const { tenants, loading, error } = useTenantContext();
+  const { rooms } = useRoomContext();
   const [isAddModalOpen, setAddModalOpen] = useState(false);
+  const [isRentModalOpen, setRentModalOpen] = useState(false);
+  const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
 
   const openAddModal = () => setAddModalOpen(true);
   const closeAddModal = () => setAddModalOpen(false);
+
+  const handleRentTo = (tenantId: string) => {
+    setSelectedTenantId(tenantId);
+    setRentModalOpen(true);
+  };
+
+  const closeRentModal = () => {
+    setRentModalOpen(false);
+    setSelectedTenantId(null);
+  };
 
   return (
     <div className="space-y-4">
@@ -70,21 +87,36 @@ const TenantsContent = () => {
                 {tenants?.length || 0} resultados
               </span>
             </div>
-            <TenantsList />
+            <TenantsList onRentTo={handleRentTo} />
           </div>
         )}
       </div>
 
       {/* Add Tenant Modal */}
       <AddTenantModal isOpen={isAddModalOpen} onClose={closeAddModal} />
+
+      {/* Rent Modal */}
+      {selectedTenantId && (
+        <AddOcupationModal 
+          isOpen={isRentModalOpen} 
+          onClose={closeRentModal}
+          preSelectedTenantId={selectedTenantId}
+          rooms={rooms}
+          tenants={tenants}
+        />
+      )}
     </div>
   );
 };
 
 export default function TenantsClient() {
   return (
-    <TenantProvider>
-      <TenantsContent />
-    </TenantProvider>
+    <RoomProvider>
+      <OcupationProvider>
+        <TenantProvider>
+          <TenantsContent />
+        </TenantProvider>
+      </OcupationProvider>
+    </RoomProvider>
   );
 }

@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
-import { APP_NAME } from "@/constants/constants";
 import Swal from "sweetalert2";
 
 function LoginForm() {
