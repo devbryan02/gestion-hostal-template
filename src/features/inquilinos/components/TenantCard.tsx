@@ -1,7 +1,7 @@
 "use client";
 
 import { Tenant, TenantWithOccupations } from "@/types";
-import { User2, Edit, Trash2, MoreHorizontal, Calendar, Mail, Phone, Home, Star } from "lucide-react";
+import { User2, Edit, Trash2, MoreHorizontal, Calendar, Home, Star } from "lucide-react";
 import { useState } from "react";
 import { useTenantContext } from "@/context/TenantContext";
 import EditTenantModal from "./EditTenantModal";

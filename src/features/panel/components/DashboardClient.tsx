@@ -4,7 +4,7 @@ import { StatsProvider } from "@/context/StatsContext";
 import { useStatsContext } from "@/context/StatsContext";
 import { StatsCards } from "./StatsCards";
 import { StatsChart } from "./StatsChart";
-import { Loader2, AlertTriangle, BarChart3 } from "lucide-react";
+import { AlertTriangle, BarChart3 } from "lucide-react";
 import { DashboardLoading } from "./DashboardLoading";
 
 export function DashboardContent() {

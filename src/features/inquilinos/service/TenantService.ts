@@ -1,18 +1,24 @@
 import { createClient } from "@/lib/supabase/client";
-import { Tenant, TenantWithOccupations, DocumentType } from "@/types/index";
+import { Tenant, DocumentType } from "@/types/index";
 
 const supabase = createClient();
 const TABLE_NAME = "tenants";
 
-// Tipo temporal para las ocupaciones en las consultas
-interface OccupationData {
+// Ocupación mínima usada en los selects
+interface Occupation {
     id: string;
     check_in_date: string;
 }
 
-// Tipo temporal para tenant con ocupaciones de Supabase
-interface TenantWithOccupationsData extends Tenant {
-    occupations: OccupationData[];
+// Fila que devuelve Supabase cuando se hace join de occupations
+interface TenantWithOccupationsRow extends Tenant {
+    occupations: Occupation[] | null;
+}
+
+// Salida interna calculada 
+interface CalculatedTenantWithOccupations extends Tenant {
+    occupation_count: number;
+    last_occupation_date?: string;
 }
 
 export interface CreateTenantRequest {
@@ -49,8 +55,30 @@ export interface DeleteTenantResponse {
 }
 
 export class TenantService {
+    private mapWithStats(row: TenantWithOccupationsRow): CalculatedTenantWithOccupations {
+        const occupations = row.occupations ?? [];
+        const occupation_count = occupations.length;
+
+        let last_occupation_date: string | undefined;
+        if (occupation_count > 0) {
+            // Obtener la última (más reciente) sin mutar el array original
+            last_occupation_date = [...occupations]
+                .sort((a, b) => new Date(b.check_in_date).getTime() - new Date(a.check_in_date).getTime())[0]
+                .check_in_date;
+        }
+
+        // Omitir el campo occupations para no enviarlo al frontend
+        const { occupations: _omit, ...tenantBase } = row;
+
+        return {
+            ...tenantBase,
+            occupation_count,
+            last_occupation_date,
+        };
+    }
+
     // Obtener inquilinos con contador de ocupaciones (más recurrentes primero)
-    async fetchWithOccupationCount(): Promise<TenantWithOccupations[]> {
+    async fetchWithOccupationCount(): Promise<CalculatedTenantWithOccupations[]> {
         const { data, error } = await supabase
             .from(TABLE_NAME)
             .select(`
@@ -64,47 +92,24 @@ export class TenantService {
 
         if (error) throw new Error(`Error fetching tenants with occupations: ${error.message}`);
 
-        // Procesar los datos para contar ocupaciones y encontrar la última fecha
-        const tenantsWithCount = (data || []).map((tenant: TenantWithOccupationsData) => {
-            const occupations = tenant.occupations || [];
-            const occupationCount = occupations.length;
-            
-            // Encontrar la fecha de la última ocupación
-            const lastOccupationDate = occupations.length > 0 
-                ? occupations
-                    .map((occ: OccupationData) => occ.check_in_date)
-                    .sort((a: string, b: string) => new Date(b).getTime() - new Date(a).getTime())[0]
-                : undefined;
+        const mapped = (data as TenantWithOccupationsRow[] ?? []).map(d => this.mapWithStats(d));
 
-            return {
-                ...tenant,
-                occupations: undefined, // Remover occupations del resultado
-                occupation_count: occupationCount,
-                last_occupation_date: lastOccupationDate
-            };
+        return mapped.sort((a, b) => {
+            if (b.occupation_count !== a.occupation_count) {
+                return b.occupation_count - a.occupation_count;
+            }
+            if (a.last_occupation_date && b.last_occupation_date) {
+                return new Date(b.last_occupation_date).getTime() - new Date(a.last_occupation_date).getTime();
+            }
+            return 0;
         });
-
-        // Ordenar por número de ocupaciones descendente, luego por última ocupación
-        return tenantsWithCount
-            .sort((a: TenantWithOccupations, b: TenantWithOccupations) => {
-                if (b.occupation_count !== a.occupation_count) {
-                    return b.occupation_count - a.occupation_count;
-                }
-                // Si tienen el mismo número de ocupaciones, ordenar por fecha más reciente
-                if (a.last_occupation_date && b.last_occupation_date) {
-                    return new Date(b.last_occupation_date).getTime() - new Date(a.last_occupation_date).getTime();
-                }
-                return 0;
-            }) as TenantWithOccupations[];
     }
 
-    // Obtener primeros 10 inquilinos más recurrentes
-    async fetchTop10Recurrent(): Promise<TenantWithOccupations[]> {
-        const allTenants = await this.fetchWithOccupationCount();
-        return allTenants.slice(0, 10);
+    async fetchTop10Recurrent(): Promise<CalculatedTenantWithOccupations[]> {
+        const all = await this.fetchWithOccupationCount();
+        return all.slice(0, 10);
     }
 
-    // Obtener primeros 10 inquilinos (comportamiento original)
     async fetchFirst10(): Promise<Tenant[]> {
         const { data, error } = await supabase
             .from(TABLE_NAME)
@@ -113,13 +118,11 @@ export class TenantService {
             .limit(10);
 
         if (error) throw new Error(`Error fetching tenants: ${error.message}`);
-        return data as Tenant[];
+        return (data ?? []) as Tenant[];
     }
 
-    // Buscar por nombre o documento
     async searchByText(text: string): Promise<Tenant[]> {
         const query = `name.ilike.%${text}%,document_number.ilike.%${text}%`;
-
         const { data, error } = await supabase
             .from(TABLE_NAME)
             .select("*")
@@ -127,11 +130,10 @@ export class TenantService {
             .limit(10);
 
         if (error) throw new Error(`Error searching tenants: ${error.message}`);
-        return data as Tenant[];
+        return (data ?? []) as Tenant[];
     }
 
-    // Buscar por nombre o documento con información de ocupaciones
-    async searchByTextWithOccupations(text: string): Promise<TenantWithOccupations[]> {
+    async searchByTextWithOccupations(text: string): Promise<CalculatedTenantWithOccupations[]> {
         const query = `name.ilike.%${text}%,document_number.ilike.%${text}%`;
 
         const { data, error } = await supabase
@@ -148,36 +150,19 @@ export class TenantService {
 
         if (error) throw new Error(`Error searching tenants: ${error.message}`);
 
-        const tenantsWithCount = data.map((tenant: any) => {
-            const occupationCount = tenant.occupations?.length || 0;
-            const lastOccupationDate = tenant.occupations?.length > 0 
-                ? tenant.occupations.sort((a: any, b: any) => 
-                    new Date(b.check_in_date).getTime() - new Date(a.check_in_date).getTime()
-                  )[0].check_in_date
-                : undefined;
+        const mapped = (data as TenantWithOccupationsRow[] ?? []).map(d => this.mapWithStats(d));
 
-            return {
-                ...tenant,
-                occupations: undefined, // Remover occupations del resultado
-                occupation_count: occupationCount,
-                last_occupation_date: lastOccupationDate
-            };
+        return mapped.sort((a, b) => {
+            if (b.occupation_count !== a.occupation_count) {
+                return b.occupation_count - a.occupation_count;
+            }
+            if (a.last_occupation_date && b.last_occupation_date) {
+                return new Date(b.last_occupation_date).getTime() - new Date(a.last_occupation_date).getTime();
+            }
+            return 0;
         });
-
-        // Ordenar por número de ocupaciones descendente
-        return tenantsWithCount
-            .sort((a: TenantWithOccupations, b: TenantWithOccupations) => {
-                if (b.occupation_count !== a.occupation_count) {
-                    return b.occupation_count - a.occupation_count;
-                }
-                if (a.last_occupation_date && b.last_occupation_date) {
-                    return new Date(b.last_occupation_date).getTime() - new Date(a.last_occupation_date).getTime();
-                }
-                return 0;
-            }) as TenantWithOccupations[];
     }
 
-    // Crear nuevo inquilino
     async create(payload: CreateTenantRequest): Promise<CreateTenantResponse> {
         const { data, error } = await supabase
             .from(TABLE_NAME)
@@ -185,7 +170,7 @@ export class TenantService {
             .select("*")
             .single();
 
-        if (error) throw new Error(`Error creating tenant: ${error.message}`);
+        if (error || !data) throw new Error(`Error creating tenant: ${error?.message}`);
 
         return {
             data: data as Tenant,
@@ -193,7 +178,6 @@ export class TenantService {
         };
     }
 
-    // Actualizar inquilino
     async update(payload: UpdateTenantRequest): Promise<UpdateTenantResponse> {
         const { id, ...updateData } = payload;
 
@@ -204,7 +188,7 @@ export class TenantService {
             .select("*")
             .single();
 
-        if (error) throw new Error(`Error updating tenant: ${error.message}`);
+        if (error || !data) throw new Error(`Error updating tenant: ${error?.message}`);
 
         return {
             data: data as Tenant,
@@ -212,14 +196,14 @@ export class TenantService {
         };
     }
 
-    // Eliminar inquilino
     async delete(id: string): Promise<DeleteTenantResponse> {
-        const { error } = await supabase.from(TABLE_NAME).delete().eq("id", id);
+        const { error } = await supabase
+            .from(TABLE_NAME)
+            .delete()
+            .eq("id", id);
 
         if (error) throw new Error(`Error deleting tenant: ${error.message}`);
 
-        return {
-            message: "Inquilino eliminado exitosamente",
-        };
+        return { message: "Inquilino eliminado exitosamente" };
     }
 }

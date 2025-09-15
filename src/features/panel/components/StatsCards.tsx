@@ -3,8 +3,7 @@ import {
   BedSingle,
   Users,
   UserCheck,
-  DollarSign,
-  TrendingUp,
+  DollarSign
 } from "lucide-react";
 import { useStatsContext } from "@/context/StatsContext";
 

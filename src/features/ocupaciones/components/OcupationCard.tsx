@@ -1,6 +1,6 @@
 "use client";
 import { Occupation } from "@/types";
-import { Calendar, User2, BedDouble, CheckCircle, XCircle, LogOut, Pencil, DollarSign, Clock } from "lucide-react";
+import { Calendar, User2, BedDouble, CheckCircle, LogOut, Pencil, DollarSign, Clock } from "lucide-react";
 import { useOcupationContext } from "@/context/OcupationContext";
 import { useState } from "react";
 import EditOcupationModal from "./EditOcupationModal";
