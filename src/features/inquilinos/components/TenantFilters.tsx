@@ -1,28 +1,18 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { useTenantContext } from "@/context/TenantContext";
 import { useState } from "react";
-import { Search, TrendingUp, Users } from "lucide-react";
+import { Search } from "lucide-react";
 
 function TenantFilters() {
-  const { searchTenants, fetchTenants, fetchRecurrentTenants, isRecurrentView } = useTenantContext();
+  const { searchTenants } = useTenantContext();
   const [searchText, setSearchText] = useState("");
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchText(value);
     searchTenants(value);
-  };
-
-  const handleToggleView = () => {
-    if (isRecurrentView) {
-      fetchTenants();
-    } else {
-      fetchRecurrentTenants();
-    }
-    setSearchText(""); // Limpiar búsqueda al cambiar vista
   };
 
   return (
@@ -36,28 +26,6 @@ function TenantFilters() {
           className="pl-10 pr-3 py-2 bg-gray-50 border-gray-200 text-gray-900 placeholder:text-gray-400 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
         />
       </div>
-      
-      <Button
-        onClick={handleToggleView}
-        variant={isRecurrentView ? "default" : "outline"}
-        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-          isRecurrentView 
-            ? "bg-indigo-600 text-white shadow-md hover:bg-indigo-700" 
-            : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
-        }`}
-      >
-        {isRecurrentView ? (
-          <>
-            <Users className="w-4 h-4" />
-            Ver Todos
-          </>
-        ) : (
-          <>
-            <TrendingUp className="w-4 h-4" />
-            Más Recurrentes
-          </>
-        )}
-      </Button>
     </div>
   );
 }

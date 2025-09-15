@@ -48,7 +48,8 @@ export function useTenants() {
     const searchTenants = useCallback(async (text: string) => {
         try {
             setLoading(true);
-            const data = await tenantService.searchByText(text);
+            // Usar la nueva función que incluye información de ocupaciones
+            const data = await tenantService.searchByTextWithOccupations(text);
             setTenants(data);
         } catch (err) {
             setError(getErrorMessage(err));
@@ -123,8 +124,8 @@ export function useTenants() {
     }, [tenantService]);
 
     useEffect(() => {
-        fetchTenants();
-    }, [fetchTenants]);
+        fetchRecurrentTenants(); // Cambiar de fetchTenants a fetchRecurrentTenants
+    }, [fetchRecurrentTenants]);
 
     return {
         tenants,

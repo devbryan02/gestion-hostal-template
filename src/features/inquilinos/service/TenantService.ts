@@ -130,6 +130,53 @@ export class TenantService {
         return data as Tenant[];
     }
 
+    // Buscar por nombre o documento con información de ocupaciones
+    async searchByTextWithOccupations(text: string): Promise<TenantWithOccupations[]> {
+        const query = `name.ilike.%${text}%,document_number.ilike.%${text}%`;
+
+        const { data, error } = await supabase
+            .from(TABLE_NAME)
+            .select(`
+                *,
+                occupations(
+                    id,
+                    check_in_date
+                )
+            `)
+            .or(query)
+            .limit(10);
+
+        if (error) throw new Error(`Error searching tenants: ${error.message}`);
+
+        const tenantsWithCount = data.map((tenant: any) => {
+            const occupationCount = tenant.occupations?.length || 0;
+            const lastOccupationDate = tenant.occupations?.length > 0 
+                ? tenant.occupations.sort((a: any, b: any) => 
+                    new Date(b.check_in_date).getTime() - new Date(a.check_in_date).getTime()
+                  )[0].check_in_date
+                : undefined;
+
+            return {
+                ...tenant,
+                occupations: undefined, // Remover occupations del resultado
+                occupation_count: occupationCount,
+                last_occupation_date: lastOccupationDate
+            };
+        });
+
+        // Ordenar por número de ocupaciones descendente
+        return tenantsWithCount
+            .sort((a: TenantWithOccupations, b: TenantWithOccupations) => {
+                if (b.occupation_count !== a.occupation_count) {
+                    return b.occupation_count - a.occupation_count;
+                }
+                if (a.last_occupation_date && b.last_occupation_date) {
+                    return new Date(b.last_occupation_date).getTime() - new Date(a.last_occupation_date).getTime();
+                }
+                return 0;
+            }) as TenantWithOccupations[];
+    }
+
     // Crear nuevo inquilino
     async create(payload: CreateTenantRequest): Promise<CreateTenantResponse> {
         const { data, error } = await supabase
