@@ -15,11 +15,11 @@ const OcupationsContent = () => {
   const [isAddModalOpen, setAddModalOpen] = useState(false);
 
   // Estado para rooms y tenants
-  const [roomsAvailable, setRoomsAvailable] = useState<{ id: string; number: string; price_per_night: number }[]>([]);
+  const [roomsAvailable, setRoomsAvailable] = useState<{ id: string; number: string; price_per_night: number; status?: string }[]>([]);
   const [tenants, setTenants] = useState<{ id: string; name: string }[]>([]);
 
   // Fetch rooms y tenants al montar el componente
-  const [rooms, setRooms] = useState<{ id: string; number: string; price_per_night: number }[]>([]);
+  const [rooms, setRooms] = useState<{ id: string; number: string; price_per_night: number; status?: string }[]>([]);
 
 
   // Fetch rooms y tenants al montar el componente
@@ -28,10 +28,10 @@ const OcupationsContent = () => {
       const roomService = new RoomService();
       const tenantService = new TenantService();
       const fetchedRoomsAvailable = await roomService.fetchByStatus("available");
-      const fetchedRooms = await roomService.fetchFirst10();
+      const fetchedAllRooms = await roomService.fetchAllWithTenantInfo(); // Para mostrar info visual
       const fetchedTenants = await tenantService.fetchFirst10();
-      setRoomsAvailable(fetchedRoomsAvailable.map(r => ({ id: r.id, number: r.number, price_per_night: r.price_per_night })));
-      setRooms(fetchedRooms.map(r => ({ id: r.id, number: r.number, price_per_night: r.price_per_night })));
+      setRoomsAvailable(fetchedRoomsAvailable.map(r => ({ id: r.id, number: r.number, price_per_night: r.price_per_night, status: r.status })));
+      setRooms(fetchedAllRooms.map(r => ({ id: r.id, number: r.number, price_per_night: r.price_per_night, status: r.status })));
       setTenants(fetchedTenants.map(t => ({ id: t.id, name: t.name })));
     };
     fetchData();

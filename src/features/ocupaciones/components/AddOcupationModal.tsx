@@ -21,7 +21,7 @@ import Swal from "sweetalert2";
 interface AddOcupationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  rooms: { id: string; number: string; price_per_night: number }[];
+  rooms: { id: string; number: string; price_per_night: number; status?: string }[];
   tenants: { id: string; name: string }[];
   preSelectedTenantId?: string;
   preSelectedRoomId?: string;

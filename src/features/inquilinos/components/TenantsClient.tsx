@@ -1,12 +1,13 @@
 "use client";
 
 import { User2, Plus } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AddTenantModal from "./AddTenantModal";
 import TenantFilters from "./TenantFilters";
 import TenantsList from "./TenantsList";
 import { TenantProvider, useTenantContext } from "@/context/TenantContext";
 import { useRoomContext } from "@/context/RoomContext";
+import { RoomService } from "@/features/habitaciones/service/RoomService";
 import { Button } from "@/components/ui/button";
 import { AddOcupationModal } from "../../ocupaciones/components/AddOcupationModal";
 import { OcupationProvider } from "@/context/OcupationContext";
@@ -18,6 +19,29 @@ const TenantsContent = () => {
   const [isAddModalOpen, setAddModalOpen] = useState(false);
   const [isRentModalOpen, setRentModalOpen] = useState(false);
   const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
+  const [availableRooms, setAvailableRooms] = useState<{ id: string; number: string; price_per_night: number; status?: string }[]>([]);
+
+  // Fetch available rooms when component mounts or when rent modal is opened
+  useEffect(() => {
+    const fetchAvailableRooms = async () => {
+      try {
+        const roomService = new RoomService();
+        const fetchedRooms = await roomService.fetchByStatus("available");
+        setAvailableRooms(fetchedRooms.map(r => ({ 
+          id: r.id, 
+          number: r.number, 
+          price_per_night: r.price_per_night, 
+          status: r.status 
+        })));
+      } catch (error) {
+        console.error("Error fetching available rooms:", error);
+      }
+    };
+
+    if (isRentModalOpen) {
+      fetchAvailableRooms();
+    }
+  }, [isRentModalOpen]);
 
   const openAddModal = () => setAddModalOpen(true);
   const closeAddModal = () => setAddModalOpen(false);
@@ -101,8 +125,8 @@ const TenantsContent = () => {
           isOpen={isRentModalOpen} 
           onClose={closeRentModal}
           preSelectedTenantId={selectedTenantId}
-          rooms={rooms}
-          tenants={tenants}
+          rooms={availableRooms}
+          tenants={tenants?.map(t => ({ id: t.id, name: t.name })) || []}
         />
       )}
     </div>
